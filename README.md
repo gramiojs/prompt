@@ -1,6 +1,6 @@
 # @gramio/prompt
 
-Prompt plugin for GramIO.
+Prompt plugin for [GramIO](https://gramio.netlify.app/).
 
 ## Usage
 

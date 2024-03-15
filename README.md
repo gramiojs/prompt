@@ -19,3 +19,19 @@ const bot = new Bot(process.env.token!)
 
 bot.start();
 ```
+
+### Validation
+
+You can define a handler in params to validate the user's answer.
+If handler returns false, the message will be repeated.
+
+```ts
+const answer = await context.prompt(
+    "message",
+    "Enter a string that contains russian letter",
+    {
+        validate: (context) => /[а-яА-Я]/.test(context.text),
+        //... and some SendMessageParams
+    }
+);
+```

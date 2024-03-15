@@ -1,6 +1,5 @@
 import type {
 	BotLike,
-	Context,
 	ContextType,
 	MaybePromise,
 	Optional,
@@ -24,21 +23,29 @@ type PromptAnswer<Event extends EventsUnion> = ContextType<BotLike, Event>;
 interface PromptData<Event extends EventsUnion> {
 	resolve: (context: PromptAnswer<Event>) => void;
 	event?: Event;
+	validate?: (context: PromptAnswer<Event>) => MaybePromise<boolean>;
+	sendParams?: Optional<SendMessageParams, "chat_id" | "text">;
+	text: string;
 }
 
 function isEvent(maybeEvent: EventsUnion | string): maybeEvent is EventsUnion {
 	return events.includes(maybeEvent as EventsUnion);
 }
 
+export interface PromptFunctionParams
+	extends Optional<SendMessageParams, "chat_id" | "text"> {
+	validate?: (context: PromptAnswer<EventsUnion>) => MaybePromise<boolean>;
+}
+
 export interface PromptFunction {
 	(
 		text: string,
-		params?: Optional<SendMessageParams, "chat_id" | "text">,
+		params?: PromptFunctionParams,
 	): Promise<PromptAnswer<EventsUnion>>;
 	<Event extends EventsUnion>(
 		event: Event,
 		text: string,
-		params?: Optional<SendMessageParams, "chat_id" | "text">,
+		params?: PromptFunctionParams,
 	): Promise<PromptAnswer<Event>>;
 }
 
@@ -49,21 +56,27 @@ export function getPrompt(
 ): PromptFunction {
 	async function prompt<Event extends EventsUnion>(
 		eventOrText: Event | string,
-		textOrParams?: string | Optional<SendMessageParams, "chat_id" | "text">,
-		params?: Optional<SendMessageParams, "chat_id" | "text">,
+		textOrParams?: string | PromptFunctionParams,
+		params?: PromptFunctionParams,
 	) {
-		if (isEvent(eventOrText) && typeof textOrParams === "string") {
-			if ("send" in context) await context.send(textOrParams, params);
-			else await context.message?.send(textOrParams, params);
-		} else if (typeof textOrParams !== "string") {
-			if ("send" in context) await context.send(eventOrText, textOrParams);
-			else await context.message?.send(eventOrText, textOrParams);
-		}
+		const { validate, ...sendParams } =
+			params || (typeof textOrParams === "object" ? textOrParams : {});
+		const text =
+			isEvent(eventOrText) && typeof textOrParams === "string"
+				? textOrParams
+				: eventOrText;
+
+		if ("send" in context) await context.send(text, sendParams);
+		else await context.message?.send(text, sendParams);
+
 		return new Promise<PromptAnswer<Event>>((resolve) => {
 			prompts.set(id, {
 				// @ts-expect-error
 				resolve: resolve,
 				event: isEvent(eventOrText) ? eventOrText : undefined,
+				validate,
+				sendParams,
+				text,
 			});
 		});
 	}

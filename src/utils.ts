@@ -32,20 +32,20 @@ function isEvent(maybeEvent: EventsUnion | string): maybeEvent is EventsUnion {
 	return events.includes(maybeEvent as EventsUnion);
 }
 
-export interface PromptFunctionParams
+export interface PromptFunctionParams<Event extends EventsUnion>
 	extends Optional<SendMessageParams, "chat_id" | "text"> {
-	validate?: (context: PromptAnswer<EventsUnion>) => MaybePromise<boolean>;
+	validate?: (context: PromptAnswer<Event>) => MaybePromise<boolean>;
 }
 
 export interface PromptFunction {
 	(
 		text: string,
-		params?: PromptFunctionParams,
+		params?: PromptFunctionParams<EventsUnion>,
 	): Promise<PromptAnswer<EventsUnion>>;
 	<Event extends EventsUnion>(
 		event: Event,
 		text: string,
-		params?: PromptFunctionParams,
+		params?: PromptFunctionParams<Event>,
 	): Promise<PromptAnswer<Event>>;
 }
 

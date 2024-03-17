@@ -28,8 +28,10 @@ interface PromptData<Event extends EventsUnion> {
 	text: string;
 }
 
-function isEvent(maybeEvent: EventsUnion | string): maybeEvent is EventsUnion {
-	return events.includes(maybeEvent as EventsUnion);
+function isEvent(
+	maybeEvent: EventsUnion | Stringable,
+): maybeEvent is EventsUnion {
+	return events.includes(maybeEvent.toString() as EventsUnion);
 }
 
 export interface PromptFunctionParams<Event extends EventsUnion>
@@ -37,14 +39,16 @@ export interface PromptFunctionParams<Event extends EventsUnion>
 	validate?: (context: PromptAnswer<Event>) => MaybePromise<boolean>;
 }
 
+type Stringable = string | { toString(): string };
+
 export interface PromptFunction {
 	(
-		text: string,
+		text: Stringable,
 		params?: PromptFunctionParams<EventsUnion>,
 	): Promise<PromptAnswer<EventsUnion>>;
 	<Event extends EventsUnion>(
 		event: Event,
-		text: string,
+		text: Stringable,
 		params?: PromptFunctionParams<Event>,
 	): Promise<PromptAnswer<Event>>;
 }
@@ -55,14 +59,22 @@ export function getPrompt(
 	context: PromptAnswer<EventsUnion>,
 ): PromptFunction {
 	async function prompt<Event extends EventsUnion>(
-		eventOrText: Event | string,
-		textOrParams?: string | PromptFunctionParams,
-		params?: PromptFunctionParams,
+		eventOrText: Event | Stringable,
+		textOrParams?: Stringable | PromptFunctionParams<Event>,
+		params?: PromptFunctionParams<Event>,
 	) {
 		const { validate, ...sendParams } =
-			params || (typeof textOrParams === "object" ? textOrParams : {});
+			params ||
+			(typeof textOrParams === "object" && !("toString" in textOrParams)
+				? textOrParams
+				: {});
+
 		const text =
-			isEvent(eventOrText) && typeof textOrParams === "string"
+			isEvent(eventOrText) &&
+			(typeof textOrParams === "string" ||
+				(textOrParams &&
+					typeof textOrParams !== "string" &&
+					"toString" in textOrParams))
 				? textOrParams
 				: eventOrText;
 
@@ -74,9 +86,10 @@ export function getPrompt(
 				// @ts-expect-error
 				resolve: resolve,
 				event: isEvent(eventOrText) ? eventOrText : undefined,
+				// @ts-expect-error
 				validate,
 				sendParams,
-				text,
+				text: text.toString(),
 			});
 		});
 	}

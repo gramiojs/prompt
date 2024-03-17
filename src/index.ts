@@ -22,7 +22,7 @@ export function prompt() {
 
 						if (prompt) {
 							if (prompt?.event && !context.is(prompt.event)) return next();
-							if (!(await prompt.validate?.(context))) {
+							if (prompt.validate && !(await prompt.validate(context))) {
 								if ("send" in context)
 									await context.send(prompt.text, prompt.sendParams);
 								else

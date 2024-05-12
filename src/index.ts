@@ -1,7 +1,159 @@
+/**
+ * @module
+ *
+ * Prompt plugin for [GramIO](https://gramio.netlify.app/).
+ */
 import { Plugin } from "gramio";
-import { type PromptsType, getPrompt } from "utils";
+import { type PromptsType, getPrompt } from "./utils";
 
-export function prompt() {
+/**
+ * Prompt plugin
+ * @example
+ * ```ts
+ * import { Bot, format, bold } from "gramio";
+ * import { prompt } from "@gramio/prompt";
+ *
+ * const bot = new Bot(process.env.token!)
+ *     .extend(prompt())
+ *     .command("start", async (context) => {
+ *         const answer = await context.prompt(
+ *             "message",
+ *             format`What's your ${bold`name`}?`
+ *         );
+ *
+ *         return context.send(`✨ Your name is ${answer.text}`);
+ *     })
+ *     .onStart(console.log);
+ *
+ * bot.start();
+ * ```
+ */
+export function prompt(): Plugin<
+	// biome-ignore lint/complexity/noBannedTypes: Temporal fix slow types compiler
+	{},
+	import("gramio").DeriveDefinitions & {
+		message: {
+			/**
+			 * @example
+			 * ```ts
+			 * import { Bot, format, bold } from "gramio";
+			 * import { prompt } from "@gramio/prompt";
+			 *
+			 * const bot = new Bot(process.env.token!)
+			 *     .extend(prompt())
+			 *     .command("start", async (context) => {
+			 *         const answer = await context.prompt(
+			 *             "message",
+			 *             format`What's your ${bold`name`}?`
+			 *         );
+			 *
+			 *         return context.send(`✨ Your name is ${answer.text}`);
+			 *     })
+			 *     .onStart(console.log);
+			 *
+			 * bot.start();
+			 * ```
+			 */
+			readonly prompt: import("./utils").PromptFunction;
+		};
+		edited_message: {
+			/**
+			 * @example
+			 * ```ts
+			 * import { Bot, format, bold } from "gramio";
+			 * import { prompt } from "@gramio/prompt";
+			 *
+			 * const bot = new Bot(process.env.token!)
+			 *     .extend(prompt())
+			 *     .command("start", async (context) => {
+			 *         const answer = await context.prompt(
+			 *             "message",
+			 *             format`What's your ${bold`name`}?`
+			 *         );
+			 *
+			 *         return context.send(`✨ Your name is ${answer.text}`);
+			 *     })
+			 *     .onStart(console.log);
+			 *
+			 * bot.start();
+			 * ```
+			 */
+			readonly prompt: import("./utils").PromptFunction;
+		};
+		channel_post: {
+			/**
+			 * @example
+			 * ```ts
+			 * import { Bot, format, bold } from "gramio";
+			 * import { prompt } from "@gramio/prompt";
+			 *
+			 * const bot = new Bot(process.env.token!)
+			 *     .extend(prompt())
+			 *     .command("start", async (context) => {
+			 *         const answer = await context.prompt(
+			 *             "message",
+			 *             format`What's your ${bold`name`}?`
+			 *         );
+			 *
+			 *         return context.send(`✨ Your name is ${answer.text}`);
+			 *     })
+			 *     .onStart(console.log);
+			 *
+			 * bot.start();
+			 * ```
+			 */
+			readonly prompt: import("./utils").PromptFunction;
+		};
+		edited_channel_post: {
+			/**
+			 * @example
+			 * ```ts
+			 * import { Bot, format, bold } from "gramio";
+			 * import { prompt } from "@gramio/prompt";
+			 *
+			 * const bot = new Bot(process.env.token!)
+			 *     .extend(prompt())
+			 *     .command("start", async (context) => {
+			 *         const answer = await context.prompt(
+			 *             "message",
+			 *             format`What's your ${bold`name`}?`
+			 *         );
+			 *
+			 *         return context.send(`✨ Your name is ${answer.text}`);
+			 *     })
+			 *     .onStart(console.log);
+			 *
+			 * bot.start();
+			 * ```
+			 */
+			readonly prompt: import("./utils").PromptFunction;
+		};
+		callback_query: {
+			/**
+			 * @example
+			 * ```ts
+			 * import { Bot, format, bold } from "gramio";
+			 * import { prompt } from "@gramio/prompt";
+			 *
+			 * const bot = new Bot(process.env.token!)
+			 *     .extend(prompt())
+			 *     .command("start", async (context) => {
+			 *         const answer = await context.prompt(
+			 *             "message",
+			 *             format`What's your ${bold`name`}?`
+			 *         );
+			 *
+			 *         return context.send(`✨ Your name is ${answer.text}`);
+			 *     })
+			 *     .onStart(console.log);
+			 *
+			 * bot.start();
+			 * ```
+			 */
+			readonly prompt: import("./utils").PromptFunction;
+		};
+	}
+> {
 	const prompts: PromptsType = new Map();
 
 	return (
@@ -50,8 +202,29 @@ export function prompt() {
 					const id = context.senderId || 0;
 
 					return {
+						/**
+						 * @example
+						 * ```ts
+						 * import { Bot, format, bold } from "gramio";
+						 * import { prompt } from "@gramio/prompt";
+						 *
+						 * const bot = new Bot(process.env.token!)
+						 *     .extend(prompt())
+						 *     .command("start", async (context) => {
+						 *         const answer = await context.prompt(
+						 *             "message",
+						 *             format`What's your ${bold`name`}?`
+						 *         );
+						 *
+						 *         return context.send(`✨ Your name is ${answer.text}`);
+						 *     })
+						 *     .onStart(console.log);
+						 *
+						 * bot.start();
+						 * ```
+						 */
 						prompt: getPrompt(prompts, id, context),
-					};
+					} as const;
 				},
 			)
 	);

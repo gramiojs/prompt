@@ -1,0 +1,16 @@
+{
+    "name": "@gramio/prompt",
+    "version": "0.0.3",
+    "exports": "./src/index.ts",
+    "publish": {
+        "include": [
+            "deno.json",
+            "src",
+            "README.md",
+            "tsconfig.json"
+        ]
+    },
+    "imports": {
+        "gramio": "jsr:@gramio/core@^0.0.32"
+    }
+}

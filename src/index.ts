@@ -54,7 +54,7 @@ export function prompt(): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction;
 		};
 		edited_message: {
 			/**
@@ -78,7 +78,7 @@ export function prompt(): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction;
 		};
 		channel_post: {
 			/**
@@ -102,7 +102,7 @@ export function prompt(): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction;
 		};
 		edited_channel_post: {
 			/**
@@ -126,7 +126,7 @@ export function prompt(): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction;
 		};
 		callback_query: {
 			/**
@@ -150,7 +150,7 @@ export function prompt(): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction;
 		};
 	}
 > {

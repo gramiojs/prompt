@@ -78,8 +78,7 @@ export function getPrompt(
 				? textOrParams
 				: eventOrText;
 
-		if ("send" in context) await context.send(text, sendParams);
-		else await context.message?.send(text, sendParams);
+		await context.send(text, sendParams);
 
 		return new Promise<PromptAnswer<Event>>((resolve) => {
 			prompts.set(id, {

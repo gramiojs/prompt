@@ -175,11 +175,7 @@ export function prompt(): Plugin<
 						if (prompt) {
 							if (prompt?.event && !context.is(prompt.event)) return next();
 							if (prompt.validate && !(await prompt.validate(context))) {
-								if ("send" in context)
-									await context.send(prompt.text, prompt.sendParams);
-								else
-									await context.message?.send(prompt.text, prompt.sendParams);
-								return;
+								return context.send(prompt.text, prompt.sendParams);
 							}
 
 							prompt.resolve(context);

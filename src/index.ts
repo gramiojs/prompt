@@ -1,7 +1,7 @@
 /**
  * @module
  *
- * Prompt plugin for [GramIO](https://gramio.netlify.app/).
+ * Prompt plugin for [GramIO](https://gramio.dev/).
  */
 import { Plugin } from "gramio";
 import { type PromptsType, getPrompt } from "./utils";

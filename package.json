@@ -4,8 +4,8 @@
     "description": "Prompt plugin for GramIO",
     "main": "dist/index.js",
     "type": "commonjs",
-    "homepage": "https://github.com/gramiojs/prompt",
-    "readme": "https://gramio.netlify.app/",
+    "homepage": "https://gramio.dev/plugins/official/prompt.html",
+    "readme": "https://github.com/gramiojs/prompt",
     "scripts": {
         "prepublishOnly": "tsc && bunx tsc-alias",
         "jsr": "bun scripts/release-jsr.ts"

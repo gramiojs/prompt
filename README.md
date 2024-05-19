@@ -4,7 +4,7 @@
 [![JSR](https://jsr.io/badges/@gramio/prompt)](https://jsr.io/@gramio/prompt)
 [![JSR Score](https://jsr.io/badges/@gramio/prompt/score)](https://jsr.io/@gramio/prompt)
 
-Prompt plugin for [GramIO](https://gramio.netlify.app/).
+Prompt plugin for [GramIO](https://gramio.dev/).
 
 ## Usage
 

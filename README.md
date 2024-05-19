@@ -12,7 +12,7 @@ A plugin for [GramIO](https://gramio.dev/) that provides [Prompt](#prompt) and w
 import { Bot, format, bold } from "gramio";
 import { prompt } from "@gramio/prompt";
 
-const bot = new Bot(process.env.token!)
+const bot = new Bot(process.env.TOKEN as string)
     .extend(prompt())
     .command("start", async (context) => {
         const answer = await context.prompt(

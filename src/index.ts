@@ -157,31 +157,6 @@ export function prompt(): Plugin<
 	const prompts: PromptsType = new Map();
 
 	return new Plugin("@gramio/prompt")
-		.on(
-			[
-				"message",
-				"edited_message",
-				"channel_post",
-				"edited_channel_post",
-				"callback_query",
-			],
-			async (context, next) => {
-				const id = context.senderId || 0;
-				const prompt = prompts.get(id);
-
-				if (prompt) {
-					if (prompt?.event && !context.is(prompt.event)) return next();
-					if (prompt.validate && !(await prompt.validate(context))) {
-						return context.send(prompt.text, prompt.sendParams);
-					}
-
-					prompt.resolve(context);
-					return prompts.delete(id);
-				}
-
-				next();
-			},
-		)
 		.derive(
 			[
 				"message",
@@ -215,8 +190,34 @@ export function prompt(): Plugin<
 					 * bot.start();
 					 * ```
 					 */
+					// @ts-expect-error
 					prompt: getPrompt(prompts, id, context),
 				} as const;
+			},
+		)
+		.on(
+			[
+				"message",
+				"edited_message",
+				"channel_post",
+				"edited_channel_post",
+				"callback_query",
+			],
+			async (context, next) => {
+				const id = context.senderId || 0;
+				const prompt = prompts.get(id);
+
+				if (prompt) {
+					if (prompt?.event && !context.is(prompt.event)) return next();
+					if (prompt.validate && !(await prompt.validate(context))) {
+						return context.send(prompt.text, prompt.sendParams);
+					}
+
+					prompt.resolve(context);
+					return prompts.delete(id);
+				}
+
+				next();
 			},
 		);
 }

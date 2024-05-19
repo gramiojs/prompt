@@ -18,7 +18,30 @@ export const events = [
 
 type EventsUnion = (typeof events)[number];
 
-type PromptAnswer<Event extends EventsUnion> = ContextType<BotLike, Event>;
+type PromptAnswer<Event extends EventsUnion> = ContextType<BotLike, Event> & {
+	/**
+	 * @example
+	 * ```ts
+	 * import { Bot, format, bold } from "gramio";
+	 * import { prompt } from "@gramio/prompt";
+	 *
+	 * const bot = new Bot(process.env.token!)
+	 *     .extend(prompt())
+	 *     .command("start", async (context) => {
+	 *         const answer = await context.prompt(
+	 *             "message",
+	 *             format`What's your ${bold`name`}?`
+	 *         );
+	 *
+	 *         return context.send(`✨ Your name is ${answer.text}`);
+	 *     })
+	 *     .onStart(console.log);
+	 *
+	 * bot.start();
+	 * ```
+	 */
+	prompt: PromptFunction;
+};
 
 interface PromptData<Event extends EventsUnion> {
 	resolve: (context: PromptAnswer<Event>) => void;

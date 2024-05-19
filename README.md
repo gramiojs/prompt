@@ -4,7 +4,7 @@
 [![JSR](https://jsr.io/badges/@gramio/prompt)](https://jsr.io/@gramio/prompt)
 [![JSR Score](https://jsr.io/badges/@gramio/prompt/score)](https://jsr.io/@gramio/prompt)
 
-Prompt plugin for [GramIO](https://gramio.dev/).
+A plugin for [GramIO](https://gramio.dev/) that provides [Prompt](#prompt) and wait methods
 
 ## Usage
 
@@ -69,5 +69,36 @@ const answer = await context.prompt(
         validate: (context) => /[а-яА-Я]/.test(context.text),
         //... and some SendMessageParams
     }
+);
+```
+
+## Wait
+
+### Wait for the next event from the user
+
+```ts
+const answer = await context.wait();
+```
+
+answer is `MessageContext` or `CallbackQueryContext`
+
+### Wait for the next event from the user ignoring events not listed
+
+```ts
+const answer = await context.wait("message");
+```
+
+answer is `CallbackQueryContext`
+
+### Wait for the next event from the user ignoring non validated answers
+
+You can define a handler in params to validate the user's answer.
+If handler return `false`, the **message** will be ignored
+
+```ts
+const answer = await context.wait((context) => /[а-яА-Я]/.test(context.text));
+// or combine with event
+const answer = await context.wait("message", (context) =>
+    /[а-яА-Я]/.test(context.text)
 );
 ```

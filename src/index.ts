@@ -4,7 +4,7 @@
  * Prompt plugin for [GramIO](https://gramio.dev/).
  */
 import { Plugin } from "gramio";
-import { type PromptsType, getPrompt } from "./utils";
+import { type PromptsType, getPrompt, getWait } from "./utils";
 
 /**
  * Prompt plugin
@@ -55,6 +55,19 @@ export function prompt(): Plugin<
 			 * ```
 			 */
 			readonly prompt: import("./utils.ts").PromptFunction;
+			/**
+			 * Wait for the next event from the user
+			 *
+			 * @example
+			 * ```ts
+			 * .command("start", async (context) => {
+			 *         const answer = await context.wait();
+			 *
+			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
+			 * })
+			 * ```
+			 *  */
+			readonly wait: import("./utils.ts").WaitFunction;
 		};
 		edited_message: {
 			/**
@@ -79,6 +92,19 @@ export function prompt(): Plugin<
 			 * ```
 			 */
 			readonly prompt: import("./utils.ts").PromptFunction;
+			/**
+			 * Wait for the next event from the user
+			 *
+			 * @example
+			 * ```ts
+			 * .command("start", async (context) => {
+			 *         const answer = await context.wait();
+			 *
+			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
+			 * })
+			 * ```
+			 *  */
+			readonly wait: import("./utils.ts").WaitFunction;
 		};
 		channel_post: {
 			/**
@@ -103,6 +129,19 @@ export function prompt(): Plugin<
 			 * ```
 			 */
 			readonly prompt: import("./utils.ts").PromptFunction;
+			/**
+			 * Wait for the next event from the user
+			 *
+			 * @example
+			 * ```ts
+			 * .command("start", async (context) => {
+			 *         const answer = await context.wait();
+			 *
+			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
+			 * })
+			 * ```
+			 *  */
+			readonly wait: import("./utils.ts").WaitFunction;
 		};
 		edited_channel_post: {
 			/**
@@ -127,6 +166,19 @@ export function prompt(): Plugin<
 			 * ```
 			 */
 			readonly prompt: import("./utils.ts").PromptFunction;
+			/**
+			 * Wait for the next event from the user
+			 *
+			 * @example
+			 * ```ts
+			 * .command("start", async (context) => {
+			 *         const answer = await context.wait();
+			 *
+			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
+			 * })
+			 * ```
+			 *  */
+			readonly wait: import("./utils.ts").WaitFunction;
 		};
 		callback_query: {
 			/**
@@ -151,6 +203,19 @@ export function prompt(): Plugin<
 			 * ```
 			 */
 			readonly prompt: import("./utils.ts").PromptFunction;
+			/**
+			 * Wait for the next event from the user
+			 *
+			 * @example
+			 * ```ts
+			 * .command("start", async (context) => {
+			 *         const answer = await context.wait();
+			 *
+			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
+			 * })
+			 * ```
+			 *  */
+			readonly wait: import("./utils.ts").WaitFunction;
 		};
 	}
 > {
@@ -170,6 +235,7 @@ export function prompt(): Plugin<
 
 				return {
 					/**
+					 * Send message and wait answer
 					 * @example
 					 * ```ts
 					 * import { Bot, format, bold } from "gramio";
@@ -192,6 +258,19 @@ export function prompt(): Plugin<
 					 */
 					// @ts-expect-error
 					prompt: getPrompt(prompts, id, context),
+					/**
+					 * Wait for the next event from the user
+					 *
+					 * @example
+					 * ```ts
+					 * .command("start", async (context) => {
+					 *         const answer = await context.wait();
+					 *
+					 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
+					 * })
+					 * ```
+					 *  */
+					wait: getWait(prompts, id),
 				} as const;
 			},
 		)
@@ -210,7 +289,9 @@ export function prompt(): Plugin<
 				if (prompt) {
 					if (prompt?.event && !context.is(prompt.event)) return next();
 					if (prompt.validate && !(await prompt.validate(context))) {
-						return context.send(prompt.text, prompt.sendParams);
+						if (prompt.text)
+							return context.send(prompt.text, prompt.sendParams);
+						return;
 					}
 
 					prompt.resolve(context);

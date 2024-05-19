@@ -4,6 +4,7 @@ import type {
 	MaybePromise,
 	Optional,
 	SendMessageParams,
+	Stringable,
 } from "gramio";
 
 export type PromptsType = Map<number, PromptData<EventsUnion>>;
@@ -48,7 +49,7 @@ interface PromptData<Event extends EventsUnion> {
 	event?: Event;
 	validate?: (context: PromptAnswer<Event>) => MaybePromise<boolean>;
 	sendParams?: Optional<SendMessageParams, "chat_id" | "text">;
-	text: string;
+	text?: string;
 }
 
 function isEvent(
@@ -57,12 +58,14 @@ function isEvent(
 	return events.includes(maybeEvent.toString() as EventsUnion);
 }
 
+export type ValidateFunction<Event extends EventsUnion> = (
+	context: PromptAnswer<Event>,
+) => MaybePromise<boolean>;
+
 export interface PromptFunctionParams<Event extends EventsUnion>
 	extends Optional<SendMessageParams, "chat_id" | "text"> {
-	validate?: (context: PromptAnswer<Event>) => MaybePromise<boolean>;
+	validate?: ValidateFunction<Event>;
 }
-
-type Stringable = string | { toString(): string };
 
 export interface PromptFunction {
 	/** Send message and wait answer */
@@ -70,11 +73,25 @@ export interface PromptFunction {
 		text: Stringable,
 		params?: PromptFunctionParams<EventsUnion>,
 	): Promise<PromptAnswer<EventsUnion>>;
-	/** Send message and wait answer */
+	/** Send message and wait answer ignoring events not listed */
 	<Event extends EventsUnion>(
 		event: Event,
 		text: Stringable,
 		params?: PromptFunctionParams<Event>,
+	): Promise<PromptAnswer<Event>>;
+}
+
+export interface WaitFunction {
+	/** Wait for the next event from the user */
+	(): Promise<PromptAnswer<EventsUnion>>;
+	/** Wait for the next event from the user ignoring events not listed */
+	<Event extends EventsUnion>(event: Event): Promise<PromptAnswer<Event>>;
+	/** Wait for the next event from the user ignoring non validated answers */
+	(validate: ValidateFunction<EventsUnion>): Promise<PromptAnswer<EventsUnion>>;
+	/** Wait for the next event from the user ignoring non validated answers and not listed events */
+	<Event extends EventsUnion>(
+		event: Event,
+		validate: ValidateFunction<Event>,
 	): Promise<PromptAnswer<Event>>;
 }
 
@@ -119,4 +136,27 @@ export function getPrompt(
 	}
 
 	return prompt;
+}
+
+export function getWait(prompts: PromptsType, id: number): WaitFunction {
+	async function wait<Event extends EventsUnion>(
+		eventOrValidate?: Event | ValidateFunction<Event>,
+		validate?: ValidateFunction<Event>,
+	) {
+		return new Promise<PromptAnswer<Event>>((resolve) => {
+			prompts.set(id, {
+				// @ts-expect-error
+				resolve: resolve,
+				event:
+					eventOrValidate && isEvent(eventOrValidate)
+						? eventOrValidate
+						: undefined,
+				// @ts-expect-error
+				validate:
+					typeof eventOrValidate === "function" ? eventOrValidate : validate,
+			});
+		});
+	}
+
+	return wait;
 }

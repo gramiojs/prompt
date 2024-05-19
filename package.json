@@ -19,12 +19,12 @@
         "answer"
     ],
     "devDependencies": {
-        "@types/bun": "^1.1.1",
-        "gramio": "^0.0.31",
+        "@types/bun": "^1.1.2",
+        "gramio": "^0.0.36",
         "typescript": "^5.4.5"
     },
     "peerDependencies": {
-        "gramio": "^0.0.31"
+        "gramio": "^0.0.35"
     },
     "files": [
         "dist"

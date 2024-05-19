@@ -42,10 +42,12 @@ export interface PromptFunctionParams<Event extends EventsUnion>
 type Stringable = string | { toString(): string };
 
 export interface PromptFunction {
+	/** Send message and wait answer */
 	(
 		text: Stringable,
 		params?: PromptFunctionParams<EventsUnion>,
 	): Promise<PromptAnswer<EventsUnion>>;
+	/** Send message and wait answer */
 	<Event extends EventsUnion>(
 		event: Event,
 		text: Stringable,

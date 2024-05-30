@@ -294,7 +294,10 @@ export function prompt(): Plugin<
 						return;
 					}
 
-					prompt.resolve(context);
+					prompt.resolve(
+						// @ts-expect-error
+						prompt.transform ? prompt.transform(context) : context,
+					);
 					return prompts.delete(id);
 				}
 

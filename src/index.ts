@@ -28,7 +28,7 @@ import { type PromptsType, getPrompt, getWait } from "./utils.js";
  * bot.start();
  * ```
  */
-export function prompt(): Plugin<
+export function prompt(map?: PromptsType): Plugin<
 	// biome-ignore lint/complexity/noBannedTypes: Temporal fix slow types compiler
 	{},
 	import("gramio").DeriveDefinitions & {
@@ -219,7 +219,7 @@ export function prompt(): Plugin<
 		};
 	}
 > {
-	const prompts: PromptsType = new Map();
+	const prompts: PromptsType = map ?? new Map();
 
 	return new Plugin("@gramio/prompt")
 		.derive(

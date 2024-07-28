@@ -1,45 +1,47 @@
 {
-	"name": "@gramio/prompt",
-	"version": "0.0.7",
-	"description": "Prompt plugin for GramIO",
-	"main": "dist/index.cjs",
-	"module": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"exports": {
-		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			},
-			"require": {
-				"types": "./dist/index.d.cts",
-				"default": "./dist/index.cjs"
-			}
-		}
-	},
-	"type": "module",
-	"homepage": "https://gramio.dev/plugins/official/prompt.html",
-	"readme": "https://github.com/gramiojs/prompt",
-	"scripts": {
-		"prepublishOnly": "bunx pkgroll",
-		"jsr": "bun scripts/release-jsr.ts"
-	},
-	"keywords": [
-		"gramio",
-		"gramio-plugin",
-		"prompt",
-		"gramio-prompt",
-		"question",
-		"answer"
-	],
-	"devDependencies": {
-		"@types/bun": "^1.1.2",
-		"gramio": "^0.0.36",
-		"pkgroll": "^2.4.1",
-		"typescript": "^5.4.5"
-	},
-	"peerDependencies": {
-		"gramio": "^0.0.35"
-	},
-	"files": ["dist"]
+  "name": "@gramio/prompt",
+  "version": "0.0.7",
+  "description": "Prompt plugin for GramIO",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "type": "module",
+  "homepage": "https://gramio.dev/plugins/official/prompt.html",
+  "readme": "https://github.com/gramiojs/prompt",
+  "scripts": {
+    "prepublishOnly": "bunx pkgroll",
+    "jsr": "bun scripts/release-jsr.ts"
+  },
+  "keywords": [
+    "gramio",
+    "gramio-plugin",
+    "prompt",
+    "gramio-prompt",
+    "question",
+    "answer"
+  ],
+  "devDependencies": {
+    "@types/bun": "^1.1.6",
+    "gramio": "^0.0.46",
+    "pkgroll": "^2.4.1",
+    "typescript": "^5.5.4"
+  },
+  "peerDependencies": {
+    "gramio": ">=0.0.39 < 1.0.0"
+  },
+  "files": [
+    "dist"
+  ]
 }

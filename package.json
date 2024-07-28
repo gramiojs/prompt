@@ -21,8 +21,7 @@
 	"homepage": "https://gramio.dev/plugins/official/prompt.html",
 	"readme": "https://github.com/gramiojs/prompt",
 	"scripts": {
-		"prepublishOnly": "bunx pkgroll",
-		"jsr": "bun scripts/release-jsr.ts"
+		"prepublishOnly": "bunx pkgroll"
 	},
 	"keywords": [
 		"gramio",

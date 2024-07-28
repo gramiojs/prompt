@@ -4,7 +4,7 @@
  * Prompt plugin for [GramIO](https://gramio.dev/).
  */
 import { Plugin } from "gramio";
-import { type PromptsType, getPrompt, getWait } from "./utils";
+import { type PromptsType, getPrompt, getWait } from "./utils.js";
 
 /**
  * Prompt plugin

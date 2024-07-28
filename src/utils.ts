@@ -1,5 +1,5 @@
 import type {
-	BotLike,
+	AnyBot,
 	ContextType,
 	MaybePromise,
 	Optional,
@@ -28,7 +28,7 @@ type PromptAnswer<
 	Event extends EventsUnion,
 	Data = never,
 > = IsNever<Data> extends true
-	? ContextType<BotLike, Event> & {
+	? ContextType<AnyBot, Event> & {
 			/**
 			 * @example
 			 * ```ts
@@ -70,7 +70,6 @@ type PromptAnswer<
 export type ValidateFunction<Event extends EventsUnion, Data> = (
 	context: PromptAnswer<Event, Data>,
 ) => MaybePromise<boolean>;
-
 export type TransformFunction<Event extends EventsUnion, Data> = (
 	context: PromptAnswer<Event, never>,
 ) => MaybePromise<Data>;

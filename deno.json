@@ -3,13 +3,7 @@
 	"version": "0.0.4",
 	"exports": "./src/index.ts",
 	"publish": {
-		"include": [
-			"deno.json",
-			"src",
-			"README.md",
-			"tsconfig.json",
-			"package.json"
-		]
+		"include": ["deno.json", "src", "README.md", "package.json", "LICENSE"]
 	},
 	"imports": {
 		"gramio": "jsr:@gramio/core@>=0.0.39 < 1.0.0"

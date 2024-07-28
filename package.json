@@ -38,7 +38,7 @@
 		"typescript": "^5.5.4"
 	},
 	"peerDependencies": {
-		"gramio": ">=0.0.39 < 1.0.0"
+		"gramio": ">=0.0.39 <1.0.0"
 	},
 	"license": "MIT",
 	"files": ["dist"]

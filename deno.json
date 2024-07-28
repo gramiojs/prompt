@@ -6,6 +6,6 @@
 		"include": ["deno.json", "src", "README.md", "package.json", "LICENSE"]
 	},
 	"imports": {
-		"gramio": "jsr:@gramio/core@>=0.0.39 < 1.0.0"
+		"gramio": "jsr:@gramio/core@>=0.0.39 <1.0.0"
 	}
 }

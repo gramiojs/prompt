@@ -73,11 +73,15 @@ export type ValidateFunction<Event extends EventsUnion, Data> = (
 export type TransformFunction<Event extends EventsUnion, Data> = (
 	context: PromptAnswer<Event, never>,
 ) => MaybePromise<Data>;
+export type OnValidateErrorFunction<Event extends EventsUnion, Data> = (
+	context: PromptAnswer<Event>,
+) => any;
 
 interface PromptData<Event extends EventsUnion, Data = never> {
 	resolve: (context: PromptAnswer<Event, Data>) => void;
 	event?: Event;
 	validate?: ValidateFunction<Event, Data>;
+	onValidateError?: string | OnValidateErrorFunction<Event, Data>;
 	transform?: TransformFunction<Event, Data>;
 	sendParams?: Optional<SendMessageParams, "chat_id" | "text">;
 	text?: string;
@@ -93,6 +97,7 @@ export interface PromptFunctionParams<Event extends EventsUnion, Data>
 	extends Optional<SendMessageParams, "chat_id" | "text"> {
 	validate?: ValidateFunction<Event, Data>;
 	transform?: TransformFunction<Event, Data>;
+	onValidateError?: OnValidateErrorFunction<Event, Data> | (string & {});
 }
 
 export interface PromptFunction {
@@ -145,7 +150,7 @@ export function getPrompt(
 		textOrParams?: FormattableString | PromptFunctionParams<Event, Data>,
 		params?: PromptFunctionParams<Event, Data>,
 	) {
-		const { validate, transform, ...sendParams } =
+		const { validate, transform, onValidateError, ...sendParams } =
 			params ||
 			(typeof textOrParams === "object" &&
 			!(textOrParams instanceof FormattableString)
@@ -171,6 +176,7 @@ export function getPrompt(
 				validate,
 				// @ts-expect-error
 				transform,
+				onValidateError,
 				sendParams,
 				text: text.toString(),
 			});
@@ -188,6 +194,7 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 			| {
 					validate?: ValidateFunction<Event, Data>;
 					transform?: TransformFunction<Event, Data>;
+					onValidateError?: string | OnValidateErrorFunction<Event, Data>;
 			  },
 	) {
 		return new Promise<PromptAnswer<Event>>((resolve) => {

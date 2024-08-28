@@ -289,6 +289,9 @@ export function prompt(map?: PromptsType): Plugin<
 				if (prompt) {
 					if (prompt?.event && !context.is(prompt.event)) return next();
 					if (prompt.validate && !(await prompt.validate(context))) {
+						if (typeof prompt.onValidateError === "string")
+							return context.send(prompt.onValidateError);
+						if (prompt.onValidateError) return prompt.onValidateError(context);
 						if (prompt.text)
 							return context.send(prompt.text, prompt.sendParams);
 						return;

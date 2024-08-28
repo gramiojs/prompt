@@ -1,6 +1,6 @@
 {
 	"name": "@gramio/prompt",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Prompt plugin for GramIO",
 	"main": "dist/index.cjs",
 	"module": "dist/index.js",

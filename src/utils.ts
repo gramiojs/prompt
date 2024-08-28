@@ -92,8 +92,8 @@ type PromptAnswer<
 		}
 	: Data;
 
-export type ValidateFunction<Event extends EventsUnion, Data> = (
-	context: PromptAnswer<Event, Data>,
+export type ValidateFunction<Event extends EventsUnion> = (
+	context: PromptAnswer<Event, never>,
 ) => MaybePromise<boolean>;
 export type TransformFunction<Event extends EventsUnion, Data> = (
 	context: PromptAnswer<Event, never>,
@@ -105,7 +105,7 @@ export type OnValidateErrorFunction<Event extends EventsUnion, Data> = (
 interface PromptData<Event extends EventsUnion, Data = never> {
 	resolve: (context: PromptAnswer<Event, Data>) => void;
 	event?: Event;
-	validate?: ValidateFunction<Event, Data>;
+	validate?: ValidateFunction<Event>;
 	onValidateError?: string | OnValidateErrorFunction<Event, Data>;
 	transform?: TransformFunction<Event, Data>;
 	sendParams?: Optional<SendMessageParams, "chat_id" | "text">;
@@ -120,7 +120,7 @@ function isEvent(
 
 export interface PromptFunctionParams<Event extends EventsUnion, Data>
 	extends Optional<SendMessageParams, "chat_id" | "text"> {
-	validate?: ValidateFunction<Event, Data>;
+	validate?: ValidateFunction<Event>;
 	transform?: TransformFunction<Event, Data>;
 	onValidateError?: OnValidateErrorFunction<Event, Data> | (string & {});
 }
@@ -148,20 +148,20 @@ export interface WaitFunction<GlobalData = never> {
 	): Promise<PromptAnswer<Event, Data>>;
 	/** Wait for the next event from the user ignoring non validated answers */
 	<Data = GlobalData>(
-		validate: ValidateFunction<EventsUnion, Data>,
+		validate: ValidateFunction<EventsUnion>,
 	): Promise<PromptAnswer<EventsUnion, Data>>;
 	/** Wait for the next event from the user ignoring non validated answers and not listed events with transformer */
 	<Event extends EventsUnion, Data = GlobalData>(
 		event: Event,
 		options: {
-			validate?: ValidateFunction<Event, Data>;
+			validate?: ValidateFunction<Event>;
 			transform?: TransformFunction<Event, Data>;
 		},
 	): Promise<PromptAnswer<Event, Data>>;
 	/** Wait for the next event from the user ignoring non validated answers and not listed events */
 	<Event extends EventsUnion, Data = GlobalData>(
 		event: Event,
-		validate: ValidateFunction<Event, Data>,
+		validate: ValidateFunction<Event>,
 	): Promise<PromptAnswer<Event, Data>>;
 }
 
@@ -216,11 +216,11 @@ export function getPrompt(
 
 export function getWait(prompts: PromptsType, id: number): WaitFunction {
 	async function wait<Event extends EventsUnion, Data>(
-		eventOrValidate?: Event | ValidateFunction<Event, Data>,
+		eventOrValidate?: Event | ValidateFunction<Event>,
 		validateOrOptions?:
-			| ValidateFunction<Event, Data>
+			| ValidateFunction<Event>
 			| {
-					validate?: ValidateFunction<Event, Data>;
+					validate?: ValidateFunction<Event>;
 					transform?: TransformFunction<Event, Data>;
 					onValidateError?: string | OnValidateErrorFunction<Event, Data>;
 			  },

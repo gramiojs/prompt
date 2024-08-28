@@ -4,7 +4,13 @@
  * Prompt plugin for [GramIO](https://gramio.dev/).
  */
 import { Plugin } from "gramio";
-import { type PromptsType, getPrompt, getWait } from "./utils.js";
+import {
+	type EventsUnion,
+	type PromptFunctionParams,
+	type PromptsType,
+	getPrompt,
+	getWait,
+} from "./utils.js";
 
 /**
  * Prompt plugin
@@ -28,7 +34,10 @@ import { type PromptsType, getPrompt, getWait } from "./utils.js";
  * bot.start();
  * ```
  */
-export function prompt(map?: PromptsType): Plugin<
+export function prompt<GlobalData = never>(options?: {
+	map?: PromptsType;
+	defaults?: PromptFunctionParams<EventsUnion, GlobalData>;
+}): Plugin<
 	// biome-ignore lint/complexity/noBannedTypes: Temporal fix slow types compiler
 	{},
 	import("gramio").DeriveDefinitions & {
@@ -54,7 +63,7 @@ export function prompt(map?: PromptsType): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils.ts").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
 			/**
 			 * Wait for the next event from the user
 			 *
@@ -67,7 +76,7 @@ export function prompt(map?: PromptsType): Plugin<
 			 * })
 			 * ```
 			 *  */
-			readonly wait: import("./utils.ts").WaitFunction;
+			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
 		};
 		edited_message: {
 			/**
@@ -91,7 +100,7 @@ export function prompt(map?: PromptsType): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils.ts").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
 			/**
 			 * Wait for the next event from the user
 			 *
@@ -104,7 +113,7 @@ export function prompt(map?: PromptsType): Plugin<
 			 * })
 			 * ```
 			 *  */
-			readonly wait: import("./utils.ts").WaitFunction;
+			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
 		};
 		channel_post: {
 			/**
@@ -128,7 +137,7 @@ export function prompt(map?: PromptsType): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils.ts").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
 			/**
 			 * Wait for the next event from the user
 			 *
@@ -141,7 +150,7 @@ export function prompt(map?: PromptsType): Plugin<
 			 * })
 			 * ```
 			 *  */
-			readonly wait: import("./utils.ts").WaitFunction;
+			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
 		};
 		edited_channel_post: {
 			/**
@@ -165,7 +174,7 @@ export function prompt(map?: PromptsType): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils.ts").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
 			/**
 			 * Wait for the next event from the user
 			 *
@@ -178,7 +187,7 @@ export function prompt(map?: PromptsType): Plugin<
 			 * })
 			 * ```
 			 *  */
-			readonly wait: import("./utils.ts").WaitFunction;
+			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
 		};
 		callback_query: {
 			/**
@@ -202,7 +211,7 @@ export function prompt(map?: PromptsType): Plugin<
 			 * bot.start();
 			 * ```
 			 */
-			readonly prompt: import("./utils.ts").PromptFunction;
+			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
 			/**
 			 * Wait for the next event from the user
 			 *
@@ -215,11 +224,11 @@ export function prompt(map?: PromptsType): Plugin<
 			 * })
 			 * ```
 			 *  */
-			readonly wait: import("./utils.ts").WaitFunction;
+			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
 		};
 	}
 > {
-	const prompts: PromptsType = map ?? new Map();
+	const prompts: PromptsType = options?.map ?? new Map();
 
 	return new Plugin("@gramio/prompt")
 		.derive(
@@ -257,7 +266,7 @@ export function prompt(map?: PromptsType): Plugin<
 					 * ```
 					 */
 					// @ts-expect-error
-					prompt: getPrompt(prompts, id, context),
+					prompt: getPrompt(prompts, id, context, options?.defaults || {}),
 					/**
 					 * Wait for the next event from the user
 					 *

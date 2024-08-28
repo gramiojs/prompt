@@ -1,6 +1,6 @@
 {
 	"name": "@gramio/prompt",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Prompt plugin for GramIO",
 	"main": "dist/index.cjs",
 	"module": "dist/index.js",
@@ -33,7 +33,7 @@
 	],
 	"devDependencies": {
 		"@types/bun": "^1.1.6",
-		"gramio": "^0.0.46",
+		"gramio": "^0.0.48",
 		"pkgroll": "2.4.0",
 		"typescript": "^5.5.4"
 	},

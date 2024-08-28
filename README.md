@@ -6,6 +6,8 @@
 
 A plugin for [GramIO](https://gramio.dev/) that provides [Prompt](#prompt) and [Wait](#wait) methods
 
+Read about [Plugin options](https://jsr.io/@gramio/prompt@0.1.0/doc/~/prompt#parameters)
+
 ## Usage
 
 ```ts

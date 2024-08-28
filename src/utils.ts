@@ -1,10 +1,10 @@
-import type {
-	AnyBot,
-	ContextType,
-	MaybePromise,
-	Optional,
-	SendMessageParams,
-	Stringable,
+import {
+	type AnyBot,
+	type ContextType,
+	FormattableString,
+	type MaybePromise,
+	type Optional,
+	type SendMessageParams,
 } from "gramio";
 
 export type PromptsType<Data = never> = Map<
@@ -84,7 +84,7 @@ interface PromptData<Event extends EventsUnion, Data = never> {
 }
 
 function isEvent(
-	maybeEvent: EventsUnion | Stringable,
+	maybeEvent: EventsUnion | FormattableString,
 ): maybeEvent is EventsUnion {
 	return events.includes(maybeEvent.toString() as EventsUnion);
 }
@@ -98,13 +98,13 @@ export interface PromptFunctionParams<Event extends EventsUnion, Data>
 export interface PromptFunction {
 	/** Send message and wait answer */
 	<Data = never>(
-		text: Stringable,
+		text: FormattableString,
 		params?: PromptFunctionParams<EventsUnion, Data>,
 	): Promise<PromptAnswer<EventsUnion, Data>>;
 	/** Send message and wait answer ignoring events not listed */
 	<Event extends EventsUnion, Data = never>(
 		event: Event,
-		text: Stringable,
+		text: FormattableString,
 		params?: PromptFunctionParams<Event, Data>,
 	): Promise<PromptAnswer<Event, Data>>;
 }
@@ -141,13 +141,14 @@ export function getPrompt(
 	context: PromptAnswer<EventsUnion>,
 ): PromptFunction {
 	async function prompt<Event extends EventsUnion, Data>(
-		eventOrText: Event | Stringable,
-		textOrParams?: Stringable | PromptFunctionParams<Event, Data>,
+		eventOrText: Event | FormattableString,
+		textOrParams?: FormattableString | PromptFunctionParams<Event, Data>,
 		params?: PromptFunctionParams<Event, Data>,
 	) {
 		const { validate, transform, ...sendParams } =
 			params ||
-			(typeof textOrParams === "object" && !("toString" in textOrParams)
+			(typeof textOrParams === "object" &&
+			!(textOrParams instanceof FormattableString)
 				? textOrParams
 				: {});
 
@@ -156,7 +157,7 @@ export function getPrompt(
 			(typeof textOrParams === "string" ||
 				(textOrParams &&
 					typeof textOrParams !== "string" &&
-					"toString" in textOrParams))
+					textOrParams instanceof FormattableString))
 				? textOrParams
 				: eventOrText;
 
@@ -194,6 +195,7 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 				// @ts-expect-error
 				resolve: resolve,
 				event:
+					// @ts-expect-error
 					eventOrValidate && isEvent(eventOrValidate)
 						? eventOrValidate
 						: undefined,

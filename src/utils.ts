@@ -11,7 +11,7 @@ import type {
 	ValidateFunction,
 	WaitFunction,
 	WaitWithActionFunction,
-} from "types.ts";
+} from "./types.ts";
 
 function isObject(item: any) {
 	return item && typeof item === "object" && !Array.isArray(item);

@@ -84,7 +84,7 @@ export function prompt<GlobalData = never>(options?: {
 				const prompt = prompts.get(id);
 
 				if (prompt) {
-					if (prompt?.event && !context.is(prompt.event)) return next();
+					if (prompt?.events && !context.is(prompt.events)) return next();
 					// @ts-ignore
 					if (prompt.validate && !(await prompt.validate(context))) {
 						if (typeof prompt.onValidateError === "string")

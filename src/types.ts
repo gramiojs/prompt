@@ -89,7 +89,7 @@ export type OnValidateErrorFunction<Event extends EventsUnion, Data> = (
 
 interface PromptData<Event extends EventsUnion, Data = never> {
 	resolve: (context: PromptAnswer<Event, Data>) => void;
-	event?: Event;
+	events?: Event[];
 	validate?: ValidateFunction<Event>;
 	onValidateError?: string | OnValidateErrorFunction<Event, Data>;
 	transform?: TransformFunction<Event, Data>;
@@ -111,8 +111,8 @@ export interface PromptFunction<GlobalData = never> {
 		params?: PromptFunctionParams<EventsUnion, Data>,
 	): Promise<PromptAnswer<EventsUnion, Data>>;
 	/** Send message and wait answer ignoring events not listed */
-	<Event extends EventsUnion, Data = GlobalData>(
-		event: Event,
+	<const Event extends EventsUnion, Data = GlobalData>(
+		event: MaybeArray<Event>,
 		text: Stringable,
 		params?: PromptFunctionParams<Event, Data>,
 	): Promise<PromptAnswer<Event, Data>>;
@@ -122,32 +122,34 @@ export interface WaitFunction<GlobalData = never> {
 	/** Wait for the next event from the user */
 	<Data = GlobalData>(): Promise<PromptAnswer<EventsUnion, Data>>;
 	/** Wait for the next event from the user ignoring events not listed */
-	<Event extends EventsUnion, Data = GlobalData>(
-		event: Event,
+	<const Event extends EventsUnion, Data = GlobalData>(
+		event: MaybeArray<Event>,
 	): Promise<PromptAnswer<Event, Data>>;
 	/** Wait for the next event from the user ignoring non validated answers */
 	<Data = GlobalData>(
 		validate: ValidateFunction<EventsUnion>,
 	): Promise<PromptAnswer<EventsUnion, Data>>;
 	/** Wait for the next event from the user ignoring non validated answers and not listed events with transformer */
-	<Event extends EventsUnion, Data = GlobalData>(
-		event: Event,
+	<const Event extends EventsUnion, Data = GlobalData>(
+		event: MaybeArray<Event>,
 		options: {
 			validate?: ValidateFunction<Event>;
 			transform?: TransformFunction<Event, Data>;
 		},
 	): Promise<PromptAnswer<Event, Data>>;
 	/** Wait for the next event from the user ignoring non validated answers and not listed events */
-	<Event extends EventsUnion, Data = GlobalData>(
-		event: Event,
+	<const Event extends EventsUnion, Data = GlobalData>(
+		event: MaybeArray<Event>,
 		validate: ValidateFunction<Event>,
 	): Promise<PromptAnswer<Event, Data>>;
 }
 
 export interface WaitWithActionFunction<GlobalData = never> {
 	// biome-ignore lint/style/useShorthandFunctionType: <explanation>
-	<Event extends EventsUnion, Data = GlobalData, ActionReturn = any>(
-		event: Event,
+	<const Event extends EventsUnion, Data = GlobalData, ActionReturn = any>(
+		event: MaybeArray<Event>,
 		action: () => MaybePromise<ActionReturn>,
 	): Promise<[PromptAnswer<Event, Data>, ActionReturn]>;
 }
+
+export type MaybeArray<T> = T | T[];

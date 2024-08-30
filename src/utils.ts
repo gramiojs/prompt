@@ -1,6 +1,7 @@
 import { FormattableString } from "gramio";
 import type {
 	EventsUnion,
+	MaybeArray,
 	OnValidateErrorFunction,
 	PromptAnswer,
 	PromptFunction,
@@ -45,8 +46,11 @@ export const events = [
 ] as const;
 
 function isEvent(
-	maybeEvent: EventsUnion | Stringable,
-): maybeEvent is EventsUnion {
+	maybeEvent: MaybeArray<EventsUnion> | Stringable,
+): maybeEvent is EventsUnion | EventsUnion[] {
+	if (Array.isArray(maybeEvent))
+		return maybeEvent.every((event) => events.includes(event));
+
 	return events.includes(maybeEvent.toString() as EventsUnion);
 }
 
@@ -57,7 +61,7 @@ export function getPrompt(
 	defaults: PromptFunctionParams<any, any>,
 ): PromptFunction {
 	async function prompt<Event extends EventsUnion, Data>(
-		eventOrText: Event | Stringable,
+		eventOrText: MaybeArray<Event> | Stringable,
 		textOrParams?: Stringable | PromptFunctionParams<Event, Data>,
 		params?: PromptFunctionParams<Event, Data>,
 	) {
@@ -81,11 +85,13 @@ export function getPrompt(
 
 		await context.send(text, sendParams);
 
+		const events = isEvent(eventOrText) ? eventOrText : undefined;
+
 		return new Promise<PromptAnswer<Event, Data>>((resolve) => {
 			prompts.set(id, {
 				// @ts-expect-error
 				resolve: resolve,
-				event: isEvent(eventOrText) ? eventOrText : undefined,
+				events: Array.isArray(events) ? events : events ? [events] : undefined,
 				validate,
 				// @ts-expect-error
 				transform,
@@ -101,7 +107,7 @@ export function getPrompt(
 
 export function getWait(prompts: PromptsType, id: number): WaitFunction {
 	async function wait<Event extends EventsUnion, Data>(
-		eventOrValidate?: Event | ValidateFunction<Event>,
+		eventOrValidate?: MaybeArray<Event> | ValidateFunction<Event>,
 		validateOrOptions?:
 			| ValidateFunction<Event>
 			| {
@@ -110,15 +116,18 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 					onValidateError?: string | OnValidateErrorFunction<Event, Data>;
 			  },
 	) {
+		const events =
+			eventOrValidate &&
+			typeof eventOrValidate !== "function" &&
+			isEvent(eventOrValidate)
+				? eventOrValidate
+				: undefined;
+
 		return new Promise<PromptAnswer<Event>>((resolve) => {
 			prompts.set(id, {
 				// @ts-expect-error
 				resolve: resolve,
-				event:
-					// @ts-expect-error
-					eventOrValidate && isEvent(eventOrValidate)
-						? eventOrValidate
-						: undefined,
+				events: Array.isArray(events) ? events : events ? [events] : undefined,
 				validate:
 					typeof eventOrValidate === "function"
 						? eventOrValidate
@@ -151,7 +160,7 @@ export function getWaitWithAction(
 		Data = never,
 		ActionReturn = any,
 	>(
-		event: EventsUnion,
+		events: MaybeArray<EventsUnion>,
 		action: () => ActionReturn,
 		validateOrOptions?:
 			| ValidateFunction<Event>
@@ -180,7 +189,7 @@ export function getWaitWithAction(
 			prompts.set(id, {
 				// @ts-expect-error
 				resolve: resolve,
-				event,
+				events: Array.isArray(events) ? events : [events],
 				validate: validate,
 				// @ts-expect-error
 				transform: async (context) => {

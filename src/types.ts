@@ -109,11 +109,11 @@ interface PromptData<
 	text?: string;
 }
 
-export interface PromptFunctionParams<Event extends EventsUnion, Data>
+export interface PromptFunctionParams<Event extends EventsUnion, Data, ActionReturn = never>
 	extends Optional<SendMessageParams, "chat_id" | "text"> {
 	validate?: ValidateFunction<Event>;
 	transform?: TransformFunction<Event, Data>;
-	onValidateError?: OnValidateErrorFunction<Event, Data> | (string & {});
+	onValidateError?: OnValidateErrorFunction<Event, Data, ActionReturn> | (string & {});
 }
 
 export interface PromptFunction<GlobalData = never> {

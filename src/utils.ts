@@ -1,4 +1,4 @@
-import { FormattableString } from "gramio";
+import { type BotLike, type ContextType, FormattableString } from "gramio";
 import type {
 	EventsUnion,
 	MaybeArray,
@@ -60,10 +60,14 @@ export function getPrompt(
 	context: PromptAnswer<EventsUnion>,
 	defaults: PromptFunctionParams<any, any>,
 ): PromptFunction {
-	async function prompt<Event extends EventsUnion, Data>(
+	async function prompt<
+		Event extends EventsUnion,
+		Data,
+		ActionReturn = ContextType<BotLike, "message">,
+	>(
 		eventOrText: MaybeArray<Event> | Stringable,
 		textOrParams?: Stringable | PromptFunctionParams<Event, Data>,
-		params?: PromptFunctionParams<Event, Data>,
+		params?: PromptFunctionParams<Event, Data, ActionReturn>,
 	) {
 		const { validate, transform, onValidateError, ...sendParams } = deepMerge(
 			defaults,
@@ -83,12 +87,13 @@ export function getPrompt(
 				? textOrParams
 				: eventOrText;
 
-		await context.send(text, sendParams);
+		const message = await context.send(text, sendParams);
 
 		const events = isEvent(eventOrText) ? eventOrText : undefined;
 
 		return new Promise<PromptAnswer<Event, Data>>((resolve) => {
 			prompts.set(id, {
+				actionReturn: message,
 				// @ts-expect-error
 				resolve: resolve,
 				events: Array.isArray(events) ? events : events ? [events] : undefined,
@@ -113,7 +118,9 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 			| {
 					validate?: ValidateFunction<Event>;
 					transform?: TransformFunction<Event, Data>;
-					onValidateError?: string | OnValidateErrorFunction<Event, Data>;
+					onValidateError?:
+						| string
+						| OnValidateErrorFunction<Event, Data, never>;
 			  },
 	) {
 		const events =
@@ -139,8 +146,10 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 					typeof validateOrOptions === "object"
 						? validateOrOptions.transform
 						: undefined,
+				// @ts-expect-error
 				onValidateError:
-					typeof validateOrOptions === "object"
+					typeof validateOrOptions === "object" ||
+					typeof validateOrOptions === "string"
 						? validateOrOptions.onValidateError
 						: undefined,
 			});

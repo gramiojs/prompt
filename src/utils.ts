@@ -49,47 +49,49 @@ export type EventsUnion = (typeof events)[number];
 
 type IsNever<T> = [T] extends [never] ? true : false;
 
+export interface PromptPluginTypes<GlobalData = never> {
+	/**
+	 * @example
+	 * ```ts
+	 * import { Bot, format, bold } from "gramio";
+	 * import { prompt } from "@gramio/prompt";
+	 *
+	 * const bot = new Bot(process.env.token!)
+	 *     .extend(prompt())
+	 *     .command("start", async (context) => {
+	 *         const answer = await context.prompt(
+	 *             "message",
+	 *             format`What's your ${bold`name`}?`
+	 *         );
+	 *
+	 *         return context.send(`✨ Your name is ${answer.text}`);
+	 *     })
+	 *     .onStart(console.log);
+	 *
+	 * bot.start();
+	 * ```
+	 */
+	prompt: PromptFunction<GlobalData>;
+	/**
+	 * Wait for the next event from the user
+	 *
+	 * @example
+	 * ```ts
+	 * .command("start", async (context) => {
+	 *         const answer = await context.wait();
+	 *
+	 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
+	 * })
+	 * ```
+	 *  */
+	wait: import("./utils.ts").WaitFunction<GlobalData>;
+}
+
 type PromptAnswer<
 	Event extends EventsUnion,
 	Data = never,
 > = IsNever<Data> extends true
-	? ContextType<AnyBot, Event> & {
-			/**
-			 * @example
-			 * ```ts
-			 * import { Bot, format, bold } from "gramio";
-			 * import { prompt } from "@gramio/prompt";
-			 *
-			 * const bot = new Bot(process.env.token!)
-			 *     .extend(prompt())
-			 *     .command("start", async (context) => {
-			 *         const answer = await context.prompt(
-			 *             "message",
-			 *             format`What's your ${bold`name`}?`
-			 *         );
-			 *
-			 *         return context.send(`✨ Your name is ${answer.text}`);
-			 *     })
-			 *     .onStart(console.log);
-			 *
-			 * bot.start();
-			 * ```
-			 */
-			prompt: PromptFunction;
-			/**
-			 * Wait for the next event from the user
-			 *
-			 * @example
-			 * ```ts
-			 * .command("start", async (context) => {
-			 *         const answer = await context.wait();
-			 *
-			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
-			 * })
-			 * ```
-			 *  */
-			wait: import("./utils.ts").WaitFunction;
-		}
+	? ContextType<AnyBot, Event> & PromptPluginTypes
 	: Data;
 
 export type ValidateFunction<Event extends EventsUnion> = (

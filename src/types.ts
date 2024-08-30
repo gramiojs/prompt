@@ -102,7 +102,7 @@ interface PromptData<
 	resolve: (context: PromptAnswer<Event, Data>) => void;
 	events?: Event[];
 	validate?: ValidateFunction<Event>;
-	onValidateError?: string | OnValidateErrorFunction<Event, Data>;
+	onValidateError?: string | OnValidateErrorFunction<Event, Data, ActionReturn>;
 	actionReturn?: ActionReturn;
 	transform?: TransformFunction<Event, Data>;
 	sendParams?: Optional<SendMessageParams, "chat_id" | "text">;

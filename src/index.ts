@@ -4,13 +4,14 @@
  * Prompt plugin for [GramIO](https://gramio.dev/).
  */
 import { Plugin } from "gramio";
-import {
-	type EventsUnion,
-	type PromptFunctionParams,
-	type PromptsType,
-	getPrompt,
-	getWait,
-} from "./utils.js";
+import { getPrompt, getWait } from "./utils.js";
+
+import type {
+	EventsUnion,
+	PromptFunctionParams,
+	PromptPluginTypes,
+	PromptsType,
+} from "./types.ts";
 
 /**
  * Prompt plugin
@@ -41,191 +42,7 @@ export function prompt<GlobalData = never>(options?: {
 	// biome-ignore lint/complexity/noBannedTypes: Temporal fix slow types compiler
 	{},
 	import("gramio").DeriveDefinitions & {
-		message: {
-			/**
-			 * @example
-			 * ```ts
-			 * import { Bot, format, bold } from "gramio";
-			 * import { prompt } from "@gramio/prompt";
-			 *
-			 * const bot = new Bot(process.env.token!)
-			 *     .extend(prompt())
-			 *     .command("start", async (context) => {
-			 *         const answer = await context.prompt(
-			 *             "message",
-			 *             format`What's your ${bold`name`}?`
-			 *         );
-			 *
-			 *         return context.send(`✨ Your name is ${answer.text}`);
-			 *     })
-			 *     .onStart(console.log);
-			 *
-			 * bot.start();
-			 * ```
-			 */
-			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
-			/**
-			 * Wait for the next event from the user
-			 *
-			 * @example
-			 * ```ts
-			 * .command("start", async (context) => {
-			 *         const answer = await context.wait();
-			 *
-			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
-			 * })
-			 * ```
-			 *  */
-			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
-		};
-		edited_message: {
-			/**
-			 * @example
-			 * ```ts
-			 * import { Bot, format, bold } from "gramio";
-			 * import { prompt } from "@gramio/prompt";
-			 *
-			 * const bot = new Bot(process.env.token!)
-			 *     .extend(prompt())
-			 *     .command("start", async (context) => {
-			 *         const answer = await context.prompt(
-			 *             "message",
-			 *             format`What's your ${bold`name`}?`
-			 *         );
-			 *
-			 *         return context.send(`✨ Your name is ${answer.text}`);
-			 *     })
-			 *     .onStart(console.log);
-			 *
-			 * bot.start();
-			 * ```
-			 */
-			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
-			/**
-			 * Wait for the next event from the user
-			 *
-			 * @example
-			 * ```ts
-			 * .command("start", async (context) => {
-			 *         const answer = await context.wait();
-			 *
-			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
-			 * })
-			 * ```
-			 *  */
-			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
-		};
-		channel_post: {
-			/**
-			 * @example
-			 * ```ts
-			 * import { Bot, format, bold } from "gramio";
-			 * import { prompt } from "@gramio/prompt";
-			 *
-			 * const bot = new Bot(process.env.token!)
-			 *     .extend(prompt())
-			 *     .command("start", async (context) => {
-			 *         const answer = await context.prompt(
-			 *             "message",
-			 *             format`What's your ${bold`name`}?`
-			 *         );
-			 *
-			 *         return context.send(`✨ Your name is ${answer.text}`);
-			 *     })
-			 *     .onStart(console.log);
-			 *
-			 * bot.start();
-			 * ```
-			 */
-			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
-			/**
-			 * Wait for the next event from the user
-			 *
-			 * @example
-			 * ```ts
-			 * .command("start", async (context) => {
-			 *         const answer = await context.wait();
-			 *
-			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
-			 * })
-			 * ```
-			 *  */
-			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
-		};
-		edited_channel_post: {
-			/**
-			 * @example
-			 * ```ts
-			 * import { Bot, format, bold } from "gramio";
-			 * import { prompt } from "@gramio/prompt";
-			 *
-			 * const bot = new Bot(process.env.token!)
-			 *     .extend(prompt())
-			 *     .command("start", async (context) => {
-			 *         const answer = await context.prompt(
-			 *             "message",
-			 *             format`What's your ${bold`name`}?`
-			 *         );
-			 *
-			 *         return context.send(`✨ Your name is ${answer.text}`);
-			 *     })
-			 *     .onStart(console.log);
-			 *
-			 * bot.start();
-			 * ```
-			 */
-			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
-			/**
-			 * Wait for the next event from the user
-			 *
-			 * @example
-			 * ```ts
-			 * .command("start", async (context) => {
-			 *         const answer = await context.wait();
-			 *
-			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
-			 * })
-			 * ```
-			 *  */
-			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
-		};
-		callback_query: {
-			/**
-			 * @example
-			 * ```ts
-			 * import { Bot, format, bold } from "gramio";
-			 * import { prompt } from "@gramio/prompt";
-			 *
-			 * const bot = new Bot(process.env.token!)
-			 *     .extend(prompt())
-			 *     .command("start", async (context) => {
-			 *         const answer = await context.prompt(
-			 *             "message",
-			 *             format`What's your ${bold`name`}?`
-			 *         );
-			 *
-			 *         return context.send(`✨ Your name is ${answer.text}`);
-			 *     })
-			 *     .onStart(console.log);
-			 *
-			 * bot.start();
-			 * ```
-			 */
-			readonly prompt: import("./utils.ts").PromptFunction<GlobalData>;
-			/**
-			 * Wait for the next event from the user
-			 *
-			 * @example
-			 * ```ts
-			 * .command("start", async (context) => {
-			 *         const answer = await context.wait();
-			 *
-			 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
-			 * })
-			 * ```
-			 *  */
-			readonly wait: import("./utils.ts").WaitFunction<GlobalData>;
-		};
+		[K in EventsUnion]: PromptPluginTypes<GlobalData>;
 	}
 > {
 	const prompts: PromptsType = options?.map ?? new Map();

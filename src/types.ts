@@ -149,6 +149,13 @@ export interface WaitWithActionFunction<GlobalData = never> {
 	<const Event extends EventsUnion, Data = GlobalData, ActionReturn = any>(
 		event: MaybeArray<Event>,
 		action: () => MaybePromise<ActionReturn>,
+		validateOrOptions?:
+			| ValidateFunction<Event>
+			| {
+					validate?: ValidateFunction<Event>;
+					transform?: TransformFunction<Event, Data>;
+					onValidateError?: string | OnValidateErrorFunction<Event, Data>;
+			  },
 	): Promise<[PromptAnswer<Event, Data>, ActionReturn]>;
 }
 

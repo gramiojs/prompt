@@ -172,35 +172,43 @@ export function getWaitWithAction(
 	) {
 		const actionReturn = await action();
 
-		const transform =
-			typeof validateOrOptions === "object"
-				? validateOrOptions.transform
-				: undefined;
-		const validate =
-			typeof validateOrOptions === "object"
-				? validateOrOptions.validate
-				: undefined;
-		const onValidateError =
-			typeof validateOrOptions === "object"
-				? validateOrOptions.onValidateError
-				: undefined;
+		const options = deepMerge(
+			defaults,
+			typeof validateOrOptions === "function"
+				? {
+						validate: validateOrOptions,
+					}
+				: validateOrOptions ?? {},
+		);
+
+		// const transform =
+		// 	typeof validateOrOptions === "object"
+		// 		? validateOrOptions.transform
+		// 		: undefined;
+		// const validate =
+		// 	typeof validateOrOptions === "object"
+		// 		? validateOrOptions.validate
+		// 		: undefined;
+		// const onValidateError =
+		// 	typeof validateOrOptions === "object"
+		// 		? validateOrOptions.onValidateError
+		// 		: undefined;
 
 		return new Promise<[PromptAnswer<Event>, ActionReturn]>((resolve) => {
 			prompts.set(id, {
 				// @ts-expect-error
 				resolve: resolve,
 				events: Array.isArray(events) ? events : [events],
-				validate: validate,
+				validate: options.validate,
 				// @ts-expect-error
 				transform: async (context) => {
-					const transformedContext = transform
-						? // @ts-expect-error
-							await transform(context)
+					const transformedContext = options.transform
+						? await options.transform(context)
 						: context;
 
 					return [transformedContext, actionReturn];
 				},
-				onValidateError: onValidateError,
+				onValidateError: options.onValidateError,
 			});
 		});
 	}

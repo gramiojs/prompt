@@ -83,15 +83,27 @@ export type ValidateFunction<Event extends EventsUnion> = (
 export type TransformFunction<Event extends EventsUnion, Data> = (
 	context: PromptAnswer<Event, never>,
 ) => MaybePromise<Data>;
-export type OnValidateErrorFunction<Event extends EventsUnion, Data> = (
+export type OnValidateErrorFunction<
+	Event extends EventsUnion,
+	Data,
+	ActionReturn = never,
+> = (
 	context: PromptAnswer<Event>,
+	...data: IsNever<ActionReturn> extends true
+		? []
+		: [actionReturn: ActionReturn]
 ) => any;
 
-interface PromptData<Event extends EventsUnion, Data = never> {
+interface PromptData<
+	Event extends EventsUnion,
+	Data = never,
+	ActionReturn = any,
+> {
 	resolve: (context: PromptAnswer<Event, Data>) => void;
 	events?: Event[];
 	validate?: ValidateFunction<Event>;
 	onValidateError?: string | OnValidateErrorFunction<Event, Data>;
+	actionReturn?: ActionReturn;
 	transform?: TransformFunction<Event, Data>;
 	sendParams?: Optional<SendMessageParams, "chat_id" | "text">;
 	text?: string;
@@ -154,7 +166,9 @@ export interface WaitWithActionFunction<GlobalData = never> {
 			| {
 					validate?: ValidateFunction<Event>;
 					transform?: TransformFunction<Event, Data>;
-					onValidateError?: string | OnValidateErrorFunction<Event, Data>;
+					onValidateError?:
+						| string
+						| OnValidateErrorFunction<Event, Data, ActionReturn>;
 			  },
 	): Promise<[PromptAnswer<Event, Data>, ActionReturn]>;
 }

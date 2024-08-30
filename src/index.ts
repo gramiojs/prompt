@@ -90,7 +90,7 @@ export function prompt<GlobalData = never>(options?: {
 						if (typeof prompt.onValidateError === "string")
 							return context.send(prompt.onValidateError);
 						// @ts-ignore
-						if (prompt.onValidateError) return prompt.onValidateError(context);
+						if (prompt.onValidateError) return prompt.onValidateError(context, prompt.actionReturn);
 						if (prompt.text)
 							return context.send(prompt.text, prompt.sendParams);
 						return;

@@ -196,6 +196,7 @@ export function getWaitWithAction(
 
 		return new Promise<[PromptAnswer<Event>, ActionReturn]>((resolve) => {
 			prompts.set(id, {
+				actionReturn,
 				// @ts-expect-error
 				resolve: resolve,
 				events: Array.isArray(events) ? events : [events],

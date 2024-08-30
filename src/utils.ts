@@ -10,6 +10,7 @@ import type {
 	TransformFunction,
 	ValidateFunction,
 	WaitFunction,
+	WaitWithActionFunction,
 } from "types.ts";
 
 function isObject(item: any) {
@@ -138,4 +139,38 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 	}
 
 	return wait;
+}
+
+export function getWaitWithAction(
+	prompts: PromptsType,
+	id: number,
+	defaults: PromptFunctionParams<any, any>,
+): WaitWithActionFunction {
+	async function prompt<
+		Event extends EventsUnion,
+		Data = never,
+		ActionReturn = any,
+	>(event: EventsUnion, action: () => ActionReturn) {
+		const actionReturn = await action();
+
+		return new Promise<[PromptAnswer<Event>, ActionReturn]>((resolve) => {
+			prompts.set(id, {
+				// @ts-expect-error
+				resolve: resolve,
+				event,
+				validate: defaults.validate,
+				// @ts-expect-error
+				transform: (context) => {
+					const transformedContext = defaults.transform
+						? defaults.transform(context)
+						: context;
+
+					return [transformedContext, actionReturn];
+				},
+				onValidateError: defaults.onValidateError,
+			});
+		});
+	}
+
+	return prompt;
 }

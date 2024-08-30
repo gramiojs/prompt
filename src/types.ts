@@ -55,6 +55,19 @@ export interface PromptPluginTypes<GlobalData = never> {
 	 * ```
 	 *  */
 	wait: import("./types.ts").WaitFunction<GlobalData>;
+	/**
+	 * Wait for the next event from the user
+	 *
+	 * @example
+	 * ```ts
+	 * .command("start", async (context) => {
+	 *         const [answer, message] = await context.waitWithAction("message", () => context.send("ok"));
+	 *
+	 *         return context.send(`✨ Next message after /start command is ${answer.text}`);
+	 * })
+	 * ```
+	 *  */
+	waitWithAction: import("./types.ts").WaitWithActionFunction<GlobalData>;
 }
 
 export type PromptAnswer<
@@ -129,4 +142,12 @@ export interface WaitFunction<GlobalData = never> {
 		event: Event,
 		validate: ValidateFunction<Event>,
 	): Promise<PromptAnswer<Event, Data>>;
+}
+
+export interface WaitWithActionFunction<GlobalData = never> {
+	// biome-ignore lint/style/useShorthandFunctionType: <explanation>
+	<Event extends EventsUnion, Data = GlobalData, ActionReturn = any>(
+		event: Event,
+		action: () => MaybePromise<ActionReturn>,
+	): Promise<[PromptAnswer<Event, Data>, ActionReturn]>;
 }

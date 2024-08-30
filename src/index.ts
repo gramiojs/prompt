@@ -4,7 +4,7 @@
  * Prompt plugin for [GramIO](https://gramio.dev/).
  */
 import { Plugin } from "gramio";
-import { getPrompt, getWait } from "./utils.js";
+import { getPrompt, getWait, getWaitWithAction } from "./utils.js";
 
 import type {
 	EventsUnion,
@@ -63,7 +63,12 @@ export function prompt<GlobalData = never>(options?: {
 					// @ts-expect-error
 					prompt: getPrompt(prompts, id, context, options?.defaults || {}),
 					wait: getWait(prompts, id),
-				} as const;
+					waitWithAction: getWaitWithAction(
+						prompts,
+						id,
+						options?.defaults || {},
+					),
+				} satisfies PromptPluginTypes<GlobalData>;
 			},
 		)
 		.on(
@@ -80,9 +85,11 @@ export function prompt<GlobalData = never>(options?: {
 
 				if (prompt) {
 					if (prompt?.event && !context.is(prompt.event)) return next();
+					// @ts-ignore
 					if (prompt.validate && !(await prompt.validate(context))) {
 						if (typeof prompt.onValidateError === "string")
 							return context.send(prompt.onValidateError);
+						// @ts-ignore
 						if (prompt.onValidateError) return prompt.onValidateError(context);
 						if (prompt.text)
 							return context.send(prompt.text, prompt.sendParams);

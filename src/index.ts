@@ -13,6 +13,8 @@ import type {
 	PromptsType,
 } from "./types.ts";
 
+export * from "./types.ts";
+
 /**
  * Prompt plugin
  * @example
@@ -36,7 +38,7 @@ import type {
  * ```
  */
 export function prompt<GlobalData = never>(options?: {
-	map?: PromptsType;
+	map?: PromptsType<GlobalData>;
 	defaults?: PromptFunctionParams<EventsUnion, GlobalData>;
 }): Plugin<
 	// biome-ignore lint/complexity/noBannedTypes: Temporal fix slow types compiler
@@ -90,7 +92,8 @@ export function prompt<GlobalData = never>(options?: {
 						if (typeof prompt.onValidateError === "string")
 							return context.send(prompt.onValidateError);
 						// @ts-ignore
-						if (prompt.onValidateError) return prompt.onValidateError(context, prompt.actionReturn);
+						if (prompt.onValidateError)
+							return prompt.onValidateError(context, prompt.actionReturn);
 						if (prompt.text)
 							return context.send(prompt.text, prompt.sendParams);
 						return;

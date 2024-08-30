@@ -14,7 +14,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
-		"isolatedDeclarations": true,
+
 		"composite": true,
 		"baseUrl": "./src",
 		"rootDir": "./src",

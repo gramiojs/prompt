@@ -150,27 +150,52 @@ export function getWaitWithAction(
 		Event extends EventsUnion,
 		Data = never,
 		ActionReturn = any,
-	>(event: EventsUnion, action: () => ActionReturn) {
+	>(
+		event: EventsUnion,
+		action: () => ActionReturn,
+		validateOrOptions?:
+			| ValidateFunction<Event>
+			| {
+					validate?: ValidateFunction<Event>;
+					transform?: TransformFunction<Event, Data>;
+					onValidateError?: string | OnValidateErrorFunction<Event, Data>;
+			  },
+	) {
 		const actionReturn = await action();
+
+		const transform =
+			typeof validateOrOptions === "object"
+				? validateOrOptions.transform
+				: undefined;
+		const validate =
+			typeof validateOrOptions === "object"
+				? validateOrOptions.validate
+				: undefined;
+		const onValidateError =
+			typeof validateOrOptions === "object"
+				? validateOrOptions.onValidateError
+				: undefined;
 
 		return new Promise<[PromptAnswer<Event>, ActionReturn]>((resolve) => {
 			prompts.set(id, {
 				// @ts-expect-error
 				resolve: resolve,
 				event,
-				validate: defaults.validate,
+				validate: validate,
 				// @ts-expect-error
-				transform: (context) => {
-					const transformedContext = defaults.transform
-						? defaults.transform(context)
+				transform: async (context) => {
+					const transformedContext = transform
+						? // @ts-expect-error
+							await transform(context)
 						: context;
 
 					return [transformedContext, actionReturn];
 				},
-				onValidateError: defaults.onValidateError,
+				onValidateError: onValidateError,
 			});
 		});
 	}
 
+	// @ts-ignore
 	return prompt;
 }

@@ -32,10 +32,10 @@
 		"answer"
 	],
 	"devDependencies": {
-		"@types/bun": "^1.1.6",
-		"gramio": "^0.0.48",
-		"pkgroll": "2.4.0",
-		"typescript": "^5.5.4"
+		"@types/bun": "^1.2.13",
+		"gramio": "^0.4.3",
+		"pkgroll": "2.12.2",
+		"typescript": "^5.8.3"
 	},
 	"peerDependencies": {
 		"gramio": ">=0.0.39 <1.0.0"

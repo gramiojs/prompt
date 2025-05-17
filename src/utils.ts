@@ -94,7 +94,6 @@ export function getPrompt(
 		return new Promise<PromptAnswer<Event, Data>>((resolve) => {
 			prompts.set(id, {
 				actionReturn: message,
-				// @ts-expect-error
 				resolve: resolve,
 				events: Array.isArray(events) ? events : events ? [events] : undefined,
 				validate,
@@ -132,7 +131,6 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 
 		return new Promise<PromptAnswer<Event>>((resolve) => {
 			prompts.set(id, {
-				// @ts-expect-error
 				resolve: resolve,
 				events: Array.isArray(events) ? events : events ? [events] : undefined,
 				validate:
@@ -146,7 +144,6 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 					typeof validateOrOptions === "object"
 						? validateOrOptions.transform
 						: undefined,
-				// @ts-expect-error
 				onValidateError:
 					typeof validateOrOptions === "object" ||
 					typeof validateOrOptions === "string"
@@ -206,7 +203,6 @@ export function getWaitWithAction(
 		return new Promise<[PromptAnswer<Event>, ActionReturn]>((resolve) => {
 			prompts.set(id, {
 				actionReturn,
-				// @ts-expect-error
 				resolve: resolve,
 				events: Array.isArray(events) ? events : [events],
 				validate: options.validate,

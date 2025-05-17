@@ -4,7 +4,7 @@
  * Prompt plugin for [GramIO](https://gramio.dev/).
  */
 import { Plugin } from "gramio";
-import { getPrompt, getWait, getWaitWithAction } from "./utils.js";
+import { events, getPrompt, getWait, getWaitWithAction } from "./utils.js";
 
 import type {
 	EventsUnion,
@@ -51,18 +51,11 @@ export function prompt<GlobalData = never>(options?: {
 
 	return new Plugin("@gramio/prompt")
 		.derive(
-			[
-				"message",
-				"edited_message",
-				"channel_post",
-				"edited_channel_post",
-				"callback_query",
-			],
+			events,
 			(context) => {
 				const id = context.senderId || 0;
 
 				return {
-					// @ts-expect-error
 					prompt: getPrompt(prompts, id, context, options?.defaults || {}),
 					wait: getWait(prompts, id),
 					waitWithAction: getWaitWithAction(
@@ -74,24 +67,17 @@ export function prompt<GlobalData = never>(options?: {
 			},
 		)
 		.on(
-			[
-				"message",
-				"edited_message",
-				"channel_post",
-				"edited_channel_post",
-				"callback_query",
-			],
+			events,
 			async (context, next) => {
 				const id = context.senderId || 0;
 				const prompt = prompts.get(id);
 
 				if (prompt) {
 					if (prompt?.events && !context.is(prompt.events)) return next();
-					// @ts-ignore
+
 					if (prompt.validate && !(await prompt.validate(context))) {
-						if (typeof prompt.onValidateError === "string")
+						if (typeof prompt.onValidateError === "string" )
 							return context.send(prompt.onValidateError);
-						// @ts-ignore
 						if (prompt.onValidateError)
 							return prompt.onValidateError(context, prompt.actionReturn);
 						if (prompt.text)
@@ -100,7 +86,6 @@ export function prompt<GlobalData = never>(options?: {
 					}
 
 					prompt.resolve(
-						// @ts-expect-error
 						prompt.transform ? prompt.transform(context) : context,
 					);
 					return prompts.delete(id);

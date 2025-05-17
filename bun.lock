@@ -4,10 +4,10 @@
     "": {
       "name": "@gramio/prompt",
       "devDependencies": {
-        "@types/bun": "latest",
-        "gramio": "latest",
-        "pkgroll": "latest",
-        "typescript": "latest",
+        "@types/bun": "^1.2.13",
+        "gramio": "^0.4.3",
+        "pkgroll": "2.12.2",
+        "typescript": "^5.8.3",
       },
       "peerDependencies": {
         "gramio": ">=0.0.39 <1.0.0",

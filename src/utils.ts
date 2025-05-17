@@ -219,6 +219,6 @@ export function getWaitWithAction(
 		});
 	}
 
-	// @ts-ignore
+	// @ts-expect-error
 	return prompt;
 }

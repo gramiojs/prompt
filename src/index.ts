@@ -91,7 +91,7 @@ export function prompt<GlobalData = never>(options?: {
 					return prompts.delete(id);
 				}
 
-				next();
+				return next();
 			},
 		);
 }

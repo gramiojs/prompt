@@ -100,6 +100,8 @@ interface PromptData<
 	ActionReturn = any,
 > {
 	resolve: (context: PromptAnswer<Event, Data>) => void;
+	reject: (reason?: any) => void;
+	timeoutExpiresAt?: number;
 	events?: Event[];
 	validate?: ValidateFunction<Event>;
 	onValidateError?: string | OnValidateErrorFunction<Event, Data, ActionReturn>;
@@ -114,6 +116,7 @@ export interface PromptFunctionParams<Event extends EventsUnion, Data, ActionRet
 	validate?: ValidateFunction<Event>;
 	transform?: TransformFunction<Event, Data>;
 	onValidateError?: OnValidateErrorFunction<Event, Data, ActionReturn> | (string & {});
+	timeout?: number;
 }
 
 export interface PromptFunction<GlobalData = never> {

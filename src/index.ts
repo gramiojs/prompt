@@ -12,6 +12,7 @@ import type {
 	PromptPluginTypes,
 	PromptsType,
 } from "./types.ts";
+import { PromptCancelError } from "./prompt-cancel-error.ts";
 
 export * from "./types.ts";
 
@@ -41,8 +42,7 @@ export function prompt<GlobalData = never>(options?: {
 	map?: PromptsType<GlobalData>;
 	defaults?: PromptFunctionParams<EventsUnion, GlobalData>;
 }): Plugin<
-	// biome-ignore lint/complexity/noBannedTypes: Temporal fix slow types compiler
-	{},
+	{ "prompt-cancel": PromptCancelError; },
 	import("gramio").DeriveDefinitions & {
 		[K in EventsUnion]: PromptPluginTypes<GlobalData>;
 	}
@@ -50,6 +50,7 @@ export function prompt<GlobalData = never>(options?: {
 	const prompts: PromptsType = options?.map ?? new Map();
 
 	return new Plugin("@gramio/prompt")
+		.error("prompt-cancel", PromptCancelError)
 		.derive(
 			events,
 			(context) => {
@@ -74,6 +75,11 @@ export function prompt<GlobalData = never>(options?: {
 
 				if (prompt) {
 					if (prompt?.events && !context.is(prompt.events)) return next();
+
+					if (prompt.timeoutExpiresAt && prompt.timeoutExpiresAt < Date.now()) {
+						prompt.reject(new PromptCancelError("timeout"));
+						return prompts.delete(id);
+					}
 
 					if (prompt.validate && !(await prompt.validate(context))) {
 						if (typeof prompt.onValidateError === "string" )

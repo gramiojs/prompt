@@ -69,7 +69,7 @@ export function getPrompt(
 		textOrParams?: Stringable | PromptFunctionParams<Event, Data>,
 		params?: PromptFunctionParams<Event, Data, ActionReturn>,
 	) {
-		const { validate, transform, onValidateError, ...sendParams } = deepMerge(
+		const { validate, transform, onValidateError, timeout, ...sendParams } = deepMerge(
 			defaults,
 			params ||
 				(typeof textOrParams === "object" &&
@@ -91,10 +91,12 @@ export function getPrompt(
 
 		const events = isEvent(eventOrText) ? eventOrText : undefined;
 
-		return new Promise<PromptAnswer<Event, Data>>((resolve) => {
+		return new Promise<PromptAnswer<Event, Data>>((resolve, reject) => {
 			prompts.set(id, {
 				actionReturn: message,
 				resolve: resolve,
+				reject: reject,
+				timeoutExpiresAt: timeout ? Date.now() + timeout : undefined,
 				events: Array.isArray(events) ? events : events ? [events] : undefined,
 				validate,
 				// @ts-expect-error
@@ -120,6 +122,7 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 					onValidateError?:
 						| string
 						| OnValidateErrorFunction<Event, Data, never>;
+					timeout?: number;
 			  },
 	) {
 		const events =
@@ -129,10 +132,14 @@ export function getWait(prompts: PromptsType, id: number): WaitFunction {
 				? eventOrValidate
 				: undefined;
 
-		return new Promise<PromptAnswer<Event>>((resolve) => {
+		const timeout = typeof validateOrOptions === "object" && "timeout" in validateOrOptions ? validateOrOptions.timeout : undefined;
+
+		return new Promise<PromptAnswer<Event>>((resolve, reject) => {
 			prompts.set(id, {
 				resolve: resolve,
+				reject: reject,
 				events: Array.isArray(events) ? events : events ? [events] : undefined,
+				timeoutExpiresAt: timeout ? Date.now() + timeout : undefined,
 				validate:
 					typeof eventOrValidate === "function"
 						? eventOrValidate
@@ -174,6 +181,7 @@ export function getWaitWithAction(
 					validate?: ValidateFunction<Event>;
 					transform?: TransformFunction<Event, Data>;
 					onValidateError?: string | OnValidateErrorFunction<Event, Data>;
+					timeout?: number;
 			  },
 	) {
 		const actionReturn = await action();
@@ -200,6 +208,8 @@ export function getWaitWithAction(
 		// 		? validateOrOptions.onValidateError
 		// 		: undefined;
 
+		const timeout = typeof validateOrOptions === "object" && "timeout" in validateOrOptions ? validateOrOptions.timeout : undefined;
+
 		return new Promise<[PromptAnswer<Event>, ActionReturn]>((resolve) => {
 			prompts.set(id, {
 				actionReturn,
@@ -215,6 +225,7 @@ export function getWaitWithAction(
 					return [transformedContext, actionReturn];
 				},
 				onValidateError: options.onValidateError,
+				timeoutExpiresAt: timeout ? Date.now() + timeout : undefined,
 			});
 		});
 	}

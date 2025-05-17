@@ -4,13 +4,15 @@
  * Prompt plugin for [GramIO](https://gramio.dev/).
  */
 import { Plugin } from "gramio";
-import { events, getPrompt, getWait, getWaitWithAction } from "./utils.js";
+import { emitCancelError, events, getPrompt, getWait, getWaitWithAction } from "./utils.ts";
 
 import type {
 	EventsUnion,
 	PromptFunctionParams,
+	PromptOptions,
 	PromptPluginTypes,
 	PromptsType,
+	TimeoutStrategy,
 } from "./types.ts";
 import { PromptCancelError } from "./prompt-cancel-error.ts";
 
@@ -38,16 +40,14 @@ export * from "./types.ts";
  * bot.start();
  * ```
  */
-export function prompt<GlobalData = never>(options?: {
-	map?: PromptsType<GlobalData>;
-	defaults?: PromptFunctionParams<EventsUnion, GlobalData>;
-}): Plugin<
+export function prompt<GlobalData = never>(options?: PromptOptions<GlobalData>): Plugin<
 	{ "prompt-cancel": PromptCancelError; },
 	import("gramio").DeriveDefinitions & {
 		[K in EventsUnion]: PromptPluginTypes<GlobalData>;
 	}
 > {
 	const prompts: PromptsType = options?.map ?? new Map();
+	const timeoutStrategy: TimeoutStrategy = options?.timeoutStrategy ?? "on-answer";
 
 	return new Plugin("@gramio/prompt")
 		.error("prompt-cancel", PromptCancelError)
@@ -57,12 +57,13 @@ export function prompt<GlobalData = never>(options?: {
 				const id = context.senderId || 0;
 
 				return {
-					prompt: getPrompt(prompts, id, context, options?.defaults || {}),
-					wait: getWait(prompts, id),
+					prompt: getPrompt(prompts, id, context, options?.defaults || {}, timeoutStrategy),
+					wait: getWait(prompts, id, timeoutStrategy),
 					waitWithAction: getWaitWithAction(
 						prompts,
 						id,
 						options?.defaults || {},
+						timeoutStrategy,
 					),
 				} satisfies PromptPluginTypes<GlobalData>;
 			},
@@ -77,8 +78,8 @@ export function prompt<GlobalData = never>(options?: {
 					if (prompt?.events && !context.is(prompt.events)) return next();
 
 					if (prompt.timeoutExpiresAt && prompt.timeoutExpiresAt < Date.now()) {
-						prompt.reject(new PromptCancelError("timeout"));
-						return prompts.delete(id);
+						emitCancelError(prompts, id);
+						return;
 					}
 
 					if (prompt.validate && !(await prompt.validate(context))) {
@@ -89,6 +90,10 @@ export function prompt<GlobalData = never>(options?: {
 						if (prompt.text)
 							return context.send(prompt.text, prompt.sendParams);
 						return;
+					}
+
+					if (prompt.timeoutId) {
+						clearTimeout(prompt.timeoutId);
 					}
 
 					prompt.resolve(

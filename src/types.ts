@@ -8,6 +8,22 @@ import type {
 } from "gramio";
 import type { events } from "./utils.ts";
 
+export type TimeoutStrategy = "on-answer" | "on-timer";
+
+export interface PromptOptions<GlobalData = never> {
+	map?: PromptsType<GlobalData>;
+	defaults?: PromptFunctionParams<EventsUnion, GlobalData>;
+
+	/**
+	 * Strategy for handling timeouts
+	 * - "on-answer": Checks timeout expiration when user responds. If answer arrives after timeout, throws error
+     * - "on-timer": Uses setTimeout to reject automatically when timeout expires, regardless of user response timing
+     * 
+	 * @default "on-answer"
+	 */
+	timeoutStrategy?: TimeoutStrategy;
+}
+
 export type Stringable = string | FormattableString;
 
 export type PromptsType<Data = never> = Map<
@@ -102,6 +118,7 @@ interface PromptData<
 	resolve: (context: PromptAnswer<Event, Data>) => void;
 	reject: (reason?: any) => void;
 	timeoutExpiresAt?: number;
+	timeoutId?: number;
 	events?: Event[];
 	validate?: ValidateFunction<Event>;
 	onValidateError?: string | OnValidateErrorFunction<Event, Data, ActionReturn>;

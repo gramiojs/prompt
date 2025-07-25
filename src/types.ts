@@ -1,5 +1,6 @@
 import type {
 	AnyBot,
+	BotLike,
 	ContextType,
 	FormattableString,
 	MaybePromise,
@@ -17,8 +18,8 @@ export interface PromptOptions<GlobalData = never> {
 	/**
 	 * Strategy for handling timeouts
 	 * - "on-answer": Checks timeout expiration when user responds. If answer arrives after timeout, throws error
-     * - "on-timer": Uses setTimeout to reject automatically when timeout expires, regardless of user response timing
-     * 
+	 * - "on-timer": Uses setTimeout to reject automatically when timeout expires, regardless of user response timing
+	 *
 	 * @default "on-answer"
 	 */
 	timeoutStrategy?: TimeoutStrategy;
@@ -90,7 +91,7 @@ export type PromptAnswer<
 	Event extends EventsUnion,
 	Data = never,
 > = IsNever<Data> extends true
-	? ContextType<AnyBot, Event> & PromptPluginTypes
+	? ContextType<BotLike, Event> & PromptPluginTypes
 	: Data;
 
 export type ValidateFunction<Event extends EventsUnion> = (
@@ -128,11 +129,16 @@ interface PromptData<
 	text?: string;
 }
 
-export interface PromptFunctionParams<Event extends EventsUnion, Data, ActionReturn = never>
-	extends Optional<SendMessageParams, "chat_id" | "text"> {
+export interface PromptFunctionParams<
+	Event extends EventsUnion,
+	Data,
+	ActionReturn = never,
+> extends Optional<SendMessageParams, "chat_id" | "text"> {
 	validate?: ValidateFunction<Event>;
 	transform?: TransformFunction<Event, Data>;
-	onValidateError?: OnValidateErrorFunction<Event, Data, ActionReturn> | (string & {});
+	onValidateError?:
+		| OnValidateErrorFunction<Event, Data, ActionReturn>
+		| (string & {});
 	timeout?: number;
 }
 

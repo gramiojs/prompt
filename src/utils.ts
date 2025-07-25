@@ -1,4 +1,6 @@
 import { type BotLike, type ContextType, FormattableString } from "gramio";
+// import { setTimeout } from "node:timers";
+import { PromptCancelError } from "./prompt-cancel-error.ts";
 import type {
 	EventsUnion,
 	MaybeArray,
@@ -14,8 +16,6 @@ import type {
 	WaitFunction,
 	WaitWithActionFunction,
 } from "./types.ts";
-// import { setTimeout } from "node:timers";
-import { PromptCancelError } from "./prompt-cancel-error.ts";
 
 function isObject(item: any) {
 	return item && typeof item === "object" && !Array.isArray(item);
@@ -62,7 +62,7 @@ export function getPrompt(
 	id: number,
 	context: PromptAnswer<EventsUnion>,
 	defaults: PromptFunctionParams<any, any>,
-	timeoutStrategy: TimeoutStrategy
+	timeoutStrategy: TimeoutStrategy,
 ): PromptFunction {
 	async function prompt<
 		Event extends EventsUnion,
@@ -73,14 +73,15 @@ export function getPrompt(
 		textOrParams?: Stringable | PromptFunctionParams<Event, Data>,
 		params?: PromptFunctionParams<Event, Data, ActionReturn>,
 	) {
-		const { validate, transform, onValidateError, timeout, ...sendParams } = deepMerge(
-			defaults,
-			params ||
-				(typeof textOrParams === "object" &&
-				!(textOrParams instanceof FormattableString)
-					? textOrParams
-					: {}),
-		);
+		const { validate, transform, onValidateError, timeout, ...sendParams } =
+			deepMerge(
+				defaults,
+				params ||
+					(typeof textOrParams === "object" &&
+					!(textOrParams instanceof FormattableString)
+						? textOrParams
+						: {}),
+			);
 
 		const text =
 			isEvent(eventOrText) &&
@@ -101,7 +102,10 @@ export function getPrompt(
 				resolve: resolve,
 				reject: reject,
 				timeoutExpiresAt: timeout ? Date.now() + timeout : undefined,
-				timeoutId: timeoutStrategy === "on-timer" && timeout ? setTimeoutCancel(prompts, id, timeout) : undefined,
+				timeoutId:
+					timeoutStrategy === "on-timer" && timeout
+						? setTimeoutCancel(prompts, id, timeout)
+						: undefined,
 				events: Array.isArray(events) ? events : events ? [events] : undefined,
 				validate,
 				// @ts-expect-error
@@ -117,10 +121,16 @@ export function getPrompt(
 }
 
 function setTimeoutCancel(prompts: PromptsType, id: number, timeout: number) {
-	return setTimeout(() => emitCancelError(prompts, id), timeout)[Symbol.toPrimitive]()
+	return setTimeout(() => emitCancelError(prompts, id), timeout)[
+		Symbol.toPrimitive
+	]();
 }
 
-export function getWait(prompts: PromptsType, id: number, timeoutStrategy: TimeoutStrategy): WaitFunction {
+export function getWait(
+	prompts: PromptsType,
+	id: number,
+	timeoutStrategy: TimeoutStrategy,
+): WaitFunction {
 	async function wait<Event extends EventsUnion, Data>(
 		eventOrValidate?: MaybeArray<Event> | ValidateFunction<Event>,
 		validateOrOptions?:
@@ -141,7 +151,10 @@ export function getWait(prompts: PromptsType, id: number, timeoutStrategy: Timeo
 				? eventOrValidate
 				: undefined;
 
-		const timeout = typeof validateOrOptions === "object" && "timeout" in validateOrOptions ? validateOrOptions.timeout : undefined;
+		const timeout =
+			typeof validateOrOptions === "object" && "timeout" in validateOrOptions
+				? validateOrOptions.timeout
+				: undefined;
 
 		return new Promise<PromptAnswer<Event>>((resolve, reject) => {
 			prompts.set(id, {
@@ -149,7 +162,10 @@ export function getWait(prompts: PromptsType, id: number, timeoutStrategy: Timeo
 				reject: reject,
 				events: Array.isArray(events) ? events : events ? [events] : undefined,
 				timeoutExpiresAt: timeout ? Date.now() + timeout : undefined,
-				timeoutId: timeoutStrategy === "on-timer" && timeout ? setTimeoutCancel(prompts, id, timeout) : undefined,
+				timeoutId:
+					timeoutStrategy === "on-timer" && timeout
+						? setTimeoutCancel(prompts, id, timeout)
+						: undefined,
 				validate:
 					typeof eventOrValidate === "function"
 						? eventOrValidate
@@ -177,7 +193,7 @@ export function getWaitWithAction(
 	prompts: PromptsType,
 	id: number,
 	defaults: PromptFunctionParams<any, any>,
-	timeoutStrategy: TimeoutStrategy
+	timeoutStrategy: TimeoutStrategy,
 ): WaitWithActionFunction {
 	async function prompt<
 		Event extends EventsUnion,
@@ -203,7 +219,7 @@ export function getWaitWithAction(
 				? {
 						validate: validateOrOptions,
 					}
-				: validateOrOptions ?? {},
+				: (validateOrOptions ?? {}),
 		);
 
 		// const transform =
@@ -219,28 +235,36 @@ export function getWaitWithAction(
 		// 		? validateOrOptions.onValidateError
 		// 		: undefined;
 
-		const timeout = typeof validateOrOptions === "object" && "timeout" in validateOrOptions ? validateOrOptions.timeout : undefined;
+		const timeout =
+			typeof validateOrOptions === "object" && "timeout" in validateOrOptions
+				? validateOrOptions.timeout
+				: undefined;
 
-		return new Promise<[PromptAnswer<Event>, ActionReturn]>((resolve, reject) => {
-			prompts.set(id, {
-				actionReturn,
-				resolve: resolve,
-				reject: reject,
-				events: Array.isArray(events) ? events : [events],
-				validate: options.validate,
-				// @ts-expect-error
-				transform: async (context) => {
-					const transformedContext = options.transform
-						? await options.transform(context)
-						: context;
+		return new Promise<[PromptAnswer<Event>, ActionReturn]>(
+			(resolve, reject) => {
+				prompts.set(id, {
+					actionReturn,
+					resolve: resolve,
+					reject: reject,
+					events: Array.isArray(events) ? events : [events],
+					validate: options.validate,
+					// @ts-expect-error
+					transform: async (context) => {
+						const transformedContext = options.transform
+							? await options.transform(context)
+							: context;
 
-					return [transformedContext, actionReturn];
-				},
-				onValidateError: options.onValidateError,
-				timeoutExpiresAt: timeout ? Date.now() + timeout : undefined,
-				timeoutId: timeoutStrategy === "on-timer" && timeout ? setTimeoutCancel(prompts, id, timeout) : undefined,
-			});
-		});
+						return [transformedContext, actionReturn];
+					},
+					onValidateError: options.onValidateError,
+					timeoutExpiresAt: timeout ? Date.now() + timeout : undefined,
+					timeoutId:
+						timeoutStrategy === "on-timer" && timeout
+							? setTimeoutCancel(prompts, id, timeout)
+							: undefined,
+				});
+			},
+		);
 	}
 
 	// @ts-expect-error
@@ -252,5 +276,8 @@ export function emitCancelError(prompts: PromptsType, id: number) {
 	if (prompt) {
 		prompt.reject(new PromptCancelError("timeout"));
 		prompts.delete(id);
-	} else console.warn(`[Timeout] Prompt with id ${id} not found. Please share it with GramIO author.`);
+	} else
+		console.warn(
+			`[Timeout] Prompt with id ${id} not found. Please share it with GramIO author.`,
+		);
 }

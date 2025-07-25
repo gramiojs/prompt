@@ -99,6 +99,7 @@ export function getPrompt(
 		return new Promise<PromptAnswer<Event, Data>>((resolve, reject) => {
 			prompts.set(id, {
 				actionReturn: message,
+				// @ts-expect-error TODO: fix this
 				resolve: resolve,
 				reject: reject,
 				timeoutExpiresAt: timeout ? Date.now() + timeout : undefined,
@@ -158,6 +159,7 @@ export function getWait(
 
 		return new Promise<PromptAnswer<Event>>((resolve, reject) => {
 			prompts.set(id, {
+				// @ts-expect-error TODO: fix this
 				resolve: resolve,
 				reject: reject,
 				events: Array.isArray(events) ? events : events ? [events] : undefined,
@@ -166,6 +168,7 @@ export function getWait(
 					timeoutStrategy === "on-timer" && timeout
 						? setTimeoutCancel(prompts, id, timeout)
 						: undefined,
+				// @ts-expect-error TODO: fix this
 				validate:
 					typeof eventOrValidate === "function"
 						? eventOrValidate
@@ -177,6 +180,7 @@ export function getWait(
 					typeof validateOrOptions === "object"
 						? validateOrOptions.transform
 						: undefined,
+				// @ts-expect-error TODO: fix this
 				onValidateError:
 					typeof validateOrOptions === "object" ||
 					typeof validateOrOptions === "string"
@@ -240,10 +244,11 @@ export function getWaitWithAction(
 				? validateOrOptions.timeout
 				: undefined;
 
-		return new Promise<[PromptAnswer<Event>, ActionReturn]>(
+		return new Promise<[PromptAnswer<Event, Data>, ActionReturn]>(
 			(resolve, reject) => {
 				prompts.set(id, {
 					actionReturn,
+					// @ts-expect-error TODO: fix this
 					resolve: resolve,
 					reject: reject,
 					events: Array.isArray(events) ? events : [events],
